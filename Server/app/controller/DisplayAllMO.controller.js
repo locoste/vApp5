@@ -1,9 +1,10 @@
-app.controller('AllProjectInformation', function($scope, $http, config) {
+app.controller('DisplayAllMO', function($scope, $http, config) {
   const url = config.api_url;
   const port = config.api_port;
-    $http({method : "GET", url : 'http://'+url+':'+port+'/AllProjectInformation'}, {headers : {'Content-Type':'application/json'}}).then(function(response) {
+
+   $http({method : "GET", url : 'http://'+url+':'+port+'/getAllMO'}, {headers : {'Content-Type':'application/json'}}).then(function(response) {
         console.log("response: ",response.data);
-        $scope.projectInformation = response.data;
+        $scope.moInformation = response.data.project;
     });
 
     $http.get('http://'+url+':'+port+'/getUserCompany').then(function(response){

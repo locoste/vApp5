@@ -10,10 +10,10 @@ app.controller('LoginController', function($scope, $http, config) {
     {     
         body = '{"email": "'+$scope.login+'", "password":"'+$scope.password+'"}'
         $http.post('http://'+url+':'+port+'/login', body).then(function(response){
-          alert(response.status)
+          console.log(response)
           $scope.login = "";
           $scope.password = "";
-          window.location.assign('http://'+url+':'+port+'/Vapp4/Accueil.html')
+          $http.get('http://'+url+':'+port+'/Vapp5/Accueil.html')
         });
     }
   });

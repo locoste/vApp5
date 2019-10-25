@@ -274,6 +274,14 @@ th {
   text-decoration: none;
 }
 
+.nav-item {
+  color:#CED5E8;
+}
+
+.nav-item:hover {
+  color:#384261;
+}
+
 /*.row {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
