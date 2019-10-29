@@ -5,6 +5,7 @@ var http = require('http');
 var fs = require('fs');
 var FormData = require('form-data'); 
 var faye = require('faye');
+var deasync = require('deasync');
 const sql = require('mssql');
 
 var odbc_url = process.env.ODBC_URL;
@@ -15,6 +16,9 @@ var lxp_port = process.env.LXP_PORT;
 
 var lxp_url = process.env.LXP_URL;
 var lxp_port = process.env.LXP_PORT;
+
+var scheduler_url = process.env.SCHEDULER_URL;
+var scheduler_port = process.env.SCHEDULER_PORT;
 
 var camera_ip_1 = process.env.CPS_CAMERA_IP1;
 var camera_port_1 = process.env.CPS_CAMERA_PORT1;
@@ -216,6 +220,48 @@ exports.displayLoginPage = function(req, res) {
     }
   }
 
+  exports.getUserInformation = function(req, res){
+    try{
+      var user = req.user.id;
+      var query = "SELECT login from users U where user_id="+user;
+      odbcConnector(query, function(result){
+        console.log(result);
+        res.send(result);
+      });
+    } catch(err){
+      console.log(err);
+    }
+  }  
+
+  exports.getCompanyInformation = function(req, res){
+    try{
+      var user = req.user.id;
+      var query = "SELECT contact,email,phone_number from users U join customer C on U.customer=C.customer_id where user_id="+user;
+      odbcConnector(query, function(result){
+        console.log(result);
+        res.send(result);
+      });
+    } catch(err){
+      console.log(err);
+    } 
+  }   
+
+  /*exports.updateUser =function(req, res){
+    var company = req.user.customer;
+    var user = req.body;
+    var query = 'UPDATE customer SET company ="'+user.company+'",email="'+user.email+'",contact="'+user.contact+'",phone_number="'+user.phone_number+'" WHERE customer_id = ' + company;
+    odbcConnector(query,function(result){
+      if(user.password==undefined){
+        var loginquery = 'UPDATE users SET login = "'+user.email+'",password = "'+user.password+'" WHERE customer = '+ company
+      } else {
+        var loginquery = 'UPDATE users SET login = "'+user.login+'" WHERE customer = '+ company
+      }
+      odbcConnector(loginquery, function(){
+        res.send('user updated')
+      })
+    })
+  }*/
+
   exports.getAllMO = function(req, res){
     try{
       var query = 'select numofs, C.datdem, qtepre, A.libar1 from ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on CL.idedoc=C.idedoc join artgen A on O.ideart=A.ideart where C.datdem is not null order by numofs desc'
@@ -228,13 +274,13 @@ exports.displayLoginPage = function(req, res) {
     }
   }
 
-exports.getFileAdress = function(req, res){
-  try{
-    var document_name = req.params.document_name;
-    var query = 'select id_dcme from documents where document_name =' +document_name
-    odbcConnector(query, function(result){
-      res.send(result);
-    })
+  exports.getFileAdress = function(req, res){
+    try{
+      var document_name = req.params.document_name;
+      var query = 'select id_dcme from documents where document_name =' +document_name
+      odbcConnector(query, function(result){
+        res.send(result);
+      })
     } catch (err){
       res.send(err)
     }
@@ -518,12 +564,13 @@ exports.stopCPSControl = function(req, res){
       if(finalProduct[i].length>0){
         for(j=0; j<finalProduct[i].length;j++){
           done=false;
+          console.log(finalProduct[i][j]);
           schedulerConnector(finalProduct[i][j][0],finalProduct[i][j][1],finalProduct[i][j][2],finalProduct[i][j][3],finalProduct[i][j][4], function(result){
             console.log(result)
             res.push(result);
             done=true;
           })
-          require('deasync').loopWhile(function(){return !done;});
+          require('deasync').loopWhile(function(){console.log(done);return !done;});
         }
       }
     }
@@ -614,97 +661,97 @@ exports.stopCPSControl = function(req, res){
         //var result = '{"chart": {container: "#example-graph",levelSeparation: 45,rootOrientation: "WEST",nodeAlign: "BOTTOM",connectors: {type: "step",style: { "stroke-width": 2}},node: {HTMLclass: "big-commpany"},callback: {onClick: function (nodeId, node, event) {ctrl.selectEvent(nodeId, node, event);}.bind(this),onTreeLoaded: function () {console.log("Graph loaded!!");}}},"nodeStructure": '+JSON.stringify(json)+'}';
         callback(json)
       })
-    })
-  }
+})
+}
 
-  function odbcConnector(request, callback){
-    try{
-      const id = {
-        host : odbc_url,
-        path: '/odbcvApp5/v1/api/odbcModels/requestdb?request='+escape(request),
-        port: odbc_port,
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'rejectUnauthorized':false
-        }
-      };  
-
-      const idCallback = function(response) {
-        let str = '';
-        response.on('data', function(chunk) {
-          str += chunk;
-        });
-
-        response.on('end', function(){
-          var result = JSON.parse(str);
-          callback(result.request);
-        })
-      }
-
-      const idReq = https.request(id, idCallback);
-      idReq.end();
-    } catch(err){
-      res.send(err)
-    }
-  }
-
-  function lxpConnector(request, callback){
-    try{
-      const id = {
-        host : lxp_url,
-        path: '/lxpConnector/v1/api/lxpModels/getData?query='+escape(request),
-        port: lxp_port,
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };  
-
-      const idCallback = function(response) {
-        let str = '';
-        response.on('data', function(chunk) {
-          str += chunk;
-        });
-
-        response.on('end', function(){
-          console.log(str);
-          var result = JSON.parse(str);
-          console.log(result)
-          callback(result.data);
-        })
-      }
-
-      const idReq = https.request(id, idCallback);
-      idReq.end();
-    } catch(err){
-      console.log(err)
-    }
-  }
-
-  function schedulerConnector(art, datedem, qteDem, mo, company, callback){
+function odbcConnector(request, callback){
+  try{
     const id = {
-      host : 'localhost',
-      path: '/api/schedulerModels/getProductPlanning?art='+art+'&datedem='+datedem+'&qteDem='+qteDem+'&mo='+mo+'&company='+company,
-      port: 3001,
+      host : odbc_url,
+      path: '/odbcvApp5/v1/api/odbcModels/requestdb?request='+escape(request),
+      port: odbc_port,
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'rejectUnauthorized':false
       }
     };  
 
-    const idSchedulerCallback = function(response) {
+    const idCallback = function(response) {
       let str = '';
       response.on('data', function(chunk) {
         str += chunk;
       });
 
       response.on('end', function(){
-        var result = JSON.parse(str)
-        callback(result.schema);
+        var result = JSON.parse(str);
+        callback(result.request);
       })
     }
 
-    const idReq = http.request(id, idSchedulerCallback);
+    const idReq = https.request(id, idCallback);
     idReq.end();
+  } catch(err){
+    res.send(err)
   }
+}
+
+function lxpConnector(request, callback){
+  try{
+    const id = {
+      host : lxp_url,
+      path: '/lxpConnector/v1/api/lxpModels/getData?query='+escape(request),
+      port: lxp_port,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };  
+
+    const idCallback = function(response) {
+      let str = '';
+      response.on('data', function(chunk) {
+        str += chunk;
+      });
+
+      response.on('end', function(){
+        console.log(str);
+        var result = JSON.parse(str);
+        console.log(result)
+        callback(result.data);
+      })
+    }
+
+    const idReq = https.request(id, idCallback);
+    idReq.end();
+  } catch(err){
+    console.log(err)
+  }
+}
+
+function schedulerConnector(art, datedem, qteDem, mo, company, callback){
+  const id = {
+    host : scheduler_url,
+    path: '/scheduler_connector/v1/api/schedulerModels/getProductPlanning?art='+art+'&datedem='+datedem+'&qteDem='+qteDem+'&mo='+mo+'&company='+company,
+    port: scheduler_port,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };  
+
+  const idSchedulerCallback = function(response) {
+    let str = '';
+    response.on('data', function(chunk) {
+      str += chunk;
+    });
+
+    response.on('end', function(){
+      var result = JSON.parse(str)
+      callback(result.schema);
+    })
+  }
+
+  const idReq = http.request(id, idSchedulerCallback);
+  idReq.end();
+}

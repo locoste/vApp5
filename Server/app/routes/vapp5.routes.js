@@ -70,6 +70,15 @@ module.exports = function(app) {
     // get user company with id
     app.get('/getUserCompany'/*, contSession.authrequired*/, controller.getUserCompany);
 
+    // get user login info
+    app.get('/getUserInformation'/*,contSession.authrequired*/,controller.getUserInformation);
+
+    // get company contact
+    app.get('/getCompanyInformation'/*,contSession.authrequired*/,controller.getCompanyInformation);
+
+    // save user changes
+    /*app.post('/updateUser',contSession.authrequired,controller.updateUser);*/
+
     // display all login page images
     app.get('/images/:image', controller.displayImages);
 

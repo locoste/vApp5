@@ -16,7 +16,7 @@ app.controller('UserPage', function($scope, $http, config) {
     })
   })
 
-  $scope.ChangeUser = function()
+  /*$scope.ChangeUser = function()
   {
     if($scope.password==$scope.repassword){
       var body = '{"login":"'+$scope.login+'", "company":"'+$scope.company+'", "password":"'+$scope.password+'","contact":"'+$scope.contact+'","email":"'+$scope.email+'","phone_number":"'+$scope.phone_number+'"}'
@@ -26,7 +26,7 @@ app.controller('UserPage', function($scope, $http, config) {
     {
       alert('password have to be the same');
     }
-  }
+  }*/
 
   function getProject()
   {

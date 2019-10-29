@@ -239,6 +239,10 @@
                     </div>
                     <div class="blankspace50"></div>
                     <div class="row">
+                    <h2>Current Issues</h2> 
+                    <button style="float:right;" class="butn" id="addIssueBtn">Add Issue</button>
+                    </div>
+                    <div class="row">
                       <table>
                         <thead>
                           <th>Type</th><th>Occur.</th><th>%/Cluster</th>
@@ -251,35 +255,69 @@
                           </tr>
                         </tbody>
                       </table>
-                      <div class="blankspace25"></div>
-                   </div>
-                 </div>
-                 <div class="col-lg-3">
-                  <div class="row">
-                    <h2>Known Issues</h2>
+                      <div class="row blankspace25"></div>
+
+                      
+                      <!-- The Modal -->
+                      <div id="addIssue" class="modal">
+                        <!-- Modal content -->
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h2 style="color:white;">Add New Issue</h2>
+                            <span class="close">&times;</span>
+                          </div>
+                          <div class="modal-body">
+                            <div class="row">
+                              <div class="col-lg-4">
+                                <p>Type</p>
+                              </div>
+                              <div class="col-lg-4">
+                                <p>Occurence</p>
+                              </div>
+                           </div>
+                            <div class="row">
+                              <div class="col-lg-4">
+                                <input text="Type"></input>
+                              </div>
+                              <div class="col-lg-4">
+                                <input text="Description"></input>
+                              </div>
+                              <div class="col-lg-4">
+                                <button class="butn">Save</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
                   </div>
-                  <div class="row">
-                    <table>
-                      <thead>
-                        <th>Type</th><th>Occur.</th> <th>% Occur.</th>
-                      </thead>
-                      <tbody>
-                        <tr ng-repeat="x in knownIssues">
-                          <td>{{x.type}}</td>
-                          <td>{{x.occurence}}</td>
-                          <td>{{x.percentage}}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <div class="col-lg-3">
+                    <div class="row">
+                      <h2>Known Issues</h2>
+                    </div>
+                    <div class="row">
+                      <table>
+                        <thead>
+                          <th>Type</th><th>Occur.</th> <th>% Occur.</th>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="x in knownIssues">
+                            <td>{{x.type}}</td>
+                            <td>{{x.occurence}}</td>
+                            <td>{{x.percentage}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-                <div class="col-lg-5">
-                  <div class="row">
-                    <h2>Pareto Chart</h2>
-                    <canvas id="pareto"></canvas>
-                    <script>
-                      var ctx = document.getElementById('pareto').getContext('2d');
-                      var chart = new Chart(ctx, {
+                  <div class="col-lg-5">
+                    <div class="row">
+                      <h2>Pareto Chart</h2>
+                      <canvas id="pareto"></canvas>
+                      <script>
+                        var ctx = document.getElementById('pareto').getContext('2d');
+                        var chart = new Chart(ctx, {
                       // The type of chart we want to create
                       type: 'bar',
 
