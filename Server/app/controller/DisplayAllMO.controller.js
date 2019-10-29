@@ -3,8 +3,8 @@ app.controller('DisplayAllMO', function($scope, $http, config) {
   const port = config.api_port;
 
    $http({method : "GET", url : 'http://'+url+':'+port+'/getAllMO'}, {headers : {'Content-Type':'application/json'}}).then(function(response) {
-        console.log("response: ",response.data);
-        $scope.moInformation = response.data.project;
+        console.log("response: ",response);
+        $scope.moInformation = response.data;
     });
 
     $http.get('http://'+url+':'+port+'/getUserCompany').then(function(response){

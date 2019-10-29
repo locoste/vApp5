@@ -112,6 +112,9 @@ module.exports = function(app) {
     // get every data of product tarking page
     app.get('/getProductionTracking/:mo'/*, contSession.authrequired*/, controller.getProductionTracking);
 
+    // Get issues
+    app.get('/getIssues/:mo'/*, contSession.authrequired*/, controller.getIssues);
+
     // new issue
     app.post('/newIssue/:mo'/*, contSession.authrequired*/, controller.newIssue);
 

@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"> 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.0/umd/popper.min.js"></script>
@@ -79,7 +80,7 @@
                           <label>MO Number</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="mo_number" type="text" ng-model='mo_number'></Input>
                         </div>
                       </div>
                       <div class="row">
@@ -87,7 +88,7 @@
                           <label>Planned Start</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="planned_start" type="text" ng-model='planned_start'></Input>
                         </div>
                       </div>
                       <div class="row">
@@ -95,7 +96,7 @@
                           <label>Real Start</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="real_start" type="text" ng-model='real_start'></Input>
                         </div>
                       </div>
                       <div class="row">
@@ -103,7 +104,7 @@
                           <label>Planned Qty</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="planned_qty" type="text" ng-model='planned_qty'></Input>
                         </div>
                       </div>
                       <div class="row">
@@ -111,7 +112,7 @@
                           <label>Released Qty</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="released_qty" type="text" ng-model='released_qty'></Input>
                         </div>
                       </div>
                     </div>
@@ -130,7 +131,7 @@
                           <label>Planned End</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="planned_end" type="text" ng-model='planned_end'></Input>
                         </div>
                       </div>
                       <div class="row">
@@ -138,7 +139,7 @@
                           <label>Real End</label>
                         </div>
                         <div class="col-lg-6">
-                          <Input></Input>
+                          <Input id="real_end" type="text" ng-model='real_end'></Input>
                         </div>
                       </div>
                       <div class="row">
@@ -174,86 +175,165 @@
                   <a class="nav-item nav-link" href="#watchlist" data-toggle="tab">Watch List</a>
                 </nav>
                 <div class="tab-content">
-                  <div class="tab-pane active" id="tracking">
-                    <iframe style="height: 500px; width: 1500px;"></iframe>
-                  </div>
-                  <div class="tab-pane" id="issues">
+                  <div class="tab-pane active" id="tracking"> <!--ONGLET TRACKING-->
+                    <canvas id="trackingChart"></canvas>
+                    <script>
+                      var ctx = document.getElementById('trackingChart').getContext('2d');
+                      var chart = new Chart(ctx, {
+                      // The type of chart we want to create
+                      type: 'bar',
 
-                    <div class="row">
-                      <div class="col-lg-7">
-                        <div class="row">
-                          <div class="col-lg-3">
-                            <h2>Cluster by :</h2>
-                          </div>
-                          <div class="col-lg-2">
-                           <button class="butn">Order</button>
-                         </div>
-                         <div class="col-lg-2">
-                           <button class="butn">Customer</button>
-                         </div>
+                      // The data for our dataset
+                      data: {
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                        datasets: [{
+                          label: 'My First dataset',
+                          backgroundColor: 'rgb(255, 140, 132)',
+                          borderColor: 'rgb(255, 140, 132)',
+                          data: [0, 10, 5, 2, 20, 30, 45]
+                        }]
+                      },
+
+                      // Configuration options go here
+                      options: {}
+                    });
+                  </script>
+
+                </div>
+                <div class="tab-pane" id="issues">
+
+                  <div class="row">
+                    <div class="col-lg-7">
+                      <div class="row">
+                        <div class="col-lg-3">
+                          <h2>Cluster by :</h2>
+                        </div>
+                        <div class="col-lg-2">
+                         <button class="butn">Order</button>
+                       </div>
+                       <div class="col-lg-2">
+                         <button class="butn">Customer</button>
                        </div>
                      </div>
-                     <p class="sep_line"></p>
                    </div>
-                   <div class="row">
-                    <div class="col-lg-4">
-                      <div class="row">
-                        <h2>Quality Controls</h2>
-                        <table>
-                          <thead>
-                            <th>Measure</th><th>Min</th><th>Max</th><th>Control</th><th>Status</th>
-                          </thead>
-                        </table>
-                      </div>
-                      <div class="row">
-                        <table>
-                          <thead>
-                            <th>Type</th><th>Occur.</th><th>%/Cluster</th>
-                          </thead>
-                        </table>
-                      </div>
+                   <p class="sep_line"></p>
+                 </div>
+                 <div class="row">
+                  <div class="col-lg-4">
+                    <div class="row">
+                      <h2>Quality Controls</h2>
+                      <table>
+                        <thead>
+                          <th>Measure</th><th>Min</th><th>Max</th><th>Control</th><th>Status</th>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="x in qualityControls">
+                            <td>{{x.measure}}</td>
+                            <td>{{x.min}}</td>
+                            <td>{{x.max}}</td>
+                            <td>{{x.control}}</td>
+                            <td>{{x.status}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                    <div class="col-lg-3">
-                      <div class="row">
-                        <h2>Known Issues</h2>
-                      </div>
-                      <div class="row">
-                        <table>
-                          <thead>
-                            <th>Type</th><th>Occur.</th> <th>% Occur.</th>
-                          </thead>
-                        </table>
-                      </div>
-                    </div>
-                    <div class="col-lg-5">
-                      <div class="row">
-                        <h2>Pareto Chart</h2>
-                      </div>
-                    </div>
-
+                    <div class="blankspace50"></div>
+                    <div class="row">
+                      <table>
+                        <thead>
+                          <th>Type</th><th>Occur.</th><th>%/Cluster</th>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="x in issues">
+                            <td>{{x.type}}</td>
+                            <td>{{x.occurence}}</td>
+                            <td>{{x.percentage}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div class="blankspace25"></div>
+                   </div>
+                 </div>
+                 <div class="col-lg-3">
+                  <div class="row">
+                    <h2>Known Issues</h2>
+                  </div>
+                  <div class="row">
+                    <table>
+                      <thead>
+                        <th>Type</th><th>Occur.</th> <th>% Occur.</th>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="x in knownIssues">
+                          <td>{{x.type}}</td>
+                          <td>{{x.occurence}}</td>
+                          <td>{{x.percentage}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                <div class="tab-pane" id="watchlist"> 
-                  <table style="width: 150vh">
-                    <thead>
-                      <th>MO Num.</th><th>Date</th><th>Product</th><th>Major Risk</th><th>Planned Start</th><th>Real Start</th><th>Planned End</th><th>Real End</th><th>Planned Qty</th><th>Released Qty</th>
-                    </thead>
-                    <tbody>
-                      <tr ng-repeat="x in projectInformation">
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="col-lg-5">
+                  <div class="row">
+                    <h2>Pareto Chart</h2>
+                    <canvas id="pareto"></canvas>
+                    <script>
+                      var ctx = document.getElementById('pareto').getContext('2d');
+                      var chart = new Chart(ctx, {
+                      // The type of chart we want to create
+                      type: 'bar',
+
+                      // The data for our dataset
+                      data: {
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                        datasets: [{
+                          label: 'My First dataset',
+                          backgroundColor: 'rgb(255, 140, 132)',
+                          borderColor: 'rgb(255, 140, 132)',
+                          data: [0, 10, 5, 2, 20, 30, 45]
+                        }]
+                      },
+
+                      // Configuration options go here
+                      options: {}
+                    });
+                  </script>
                 </div>
               </div>
 
-            </div> <!--Fin des onglets-->
-
-            <p></p>
-          </form>
+            </div>
+          </div>
+          <div class="tab-pane" id="watchlist"> 
+            <table style="width: 150vh">
+              <thead>
+                <th>MO Num.</th><th>Date</th><th>Product</th><th>Major Risk</th><th>Planned Start</th><th>Real Start</th><th>Planned End</th><th>Real End</th><th>Planned Qty</th><th>Released Qty</th>
+              </thead>
+              <tbody>
+                <tr ng-repeat="x in watchList">
+                  <td>{{x.moNumber}}</td>
+                  <td>{{x.date}}</td>
+                  <td>{{x.product}}</td>
+                  <td>{{x.majorRisk}}</td>
+                  <td>{{x.plannedStart}}</td>
+                  <td>{{x.realStart}}</td>
+                  <td>{{x.plannedEnd}}</td>
+                  <td>{{x.realEnd}}</td>
+                  <td>{{x.plannedQty}}</td>
+                  <td>{{x.releasedQty}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </div>
+
+      </div> <!--Fin des onglets-->
+
+      <p></p>
+    </form>
   </div>
+</div>
+</div>
+</div>
 </div>
 <script src="./controller/Project.js"></script>
 <script src="./controller/TrackProd.controller.js"></script>

@@ -33,7 +33,7 @@
       <div class="col-lg-10">
         <div class="row">
           <div class="col-lg-10" style="padding-top: 12px;">
-          <h1>ONGOING PROJECTS</h1>
+          <h1>MANUFACTURING ORDERS LIST</h1>
           </div>
           <div class="col-lg-2">
             <div class="header_icons">
@@ -52,16 +52,15 @@
 
         <table>
           <thead>
-            <th>Project Name</th><th>Project Description</th><th>Company</th><th>Creation date</th><th>Expected delivery</th>
+            <th>MO Num.</th><th>Date</th><th>Quantity</th><th>Product</th><th></th>
           </thead>
         	<tbody>
         		<tr ng-repeat="x in moInformation">
-        			<!--<td>{{x.projectName}}</td>
-        			<td>{{x.projectDescription}}</td>
-        			<td>{{x.company}}</td>
-        			<td>{{x.creation_date}}</td>
-        			<td>{{x.expected_delivery}}</td>
-              <td><a ng-href="DisplayProject.html?{{x.projectName}}"><i class="fas fa-info-circle fa-2x"></i></a></td>-->
+        			<td>{{x.numofs}}</td>
+        			<td>{{x.datdem}}</td>
+        			<td>{{x.qtepre}}</td>
+        			<td>{{x.libar1}}</td>
+              <td><a ng-href="TrackProd.html?{{x.numofs}}"><i class="fas fa-info-circle fa-2x"></i></a></td>
         		</tr>
         	</tbody>
         </table>

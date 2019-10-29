@@ -48,7 +48,7 @@ var config =
  database:default_database
 };
 
-function getDataAPR(request, callback){
+function lxpConnector(request, callback){
   try {
     var pool = new sql.ConnectionPool(config);
     pool.connect().then(result => {
@@ -218,7 +218,8 @@ exports.displayLoginPage = function(req, res) {
 
   exports.getAllMO = function(req, res){
     try{
-      var query = 'select numofs, C.datdem, qtepre, A.libar1 from ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on CL.idedoc=C.idedoc join artgen A on O.ideart=A.ideart where C.datdem is not null'
+      var query = 'select numofs, C.datdem, qtepre, A.libar1 from ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on CL.idedoc=C.idedoc join artgen A on O.ideart=A.ideart where C.datdem is not null order by numofs desc'
+      console.log(query)
       lxpConnector(query, function(result){
         res.send(result);
       })
@@ -365,7 +366,7 @@ exports.stopCPSControl = function(req, res){
     var queryMO = "select * from mo where mo='"+mo+"'";
     odbcConnector(queryMO, function(moResult){
       var clientProdQuery = "select O.numofs, A.libar1, CE.codcpt, min(OP.datdebpre) as datdebpre, CE.datdem, O.qtepre from ofscde OC join cdelig CL on OC.idelig=CL.idelig join cdeent CE on CL.idedoc=CE.idedoc join ofsgen O on O.ideofs=OC.ideofs join artgen A on O.ideart=A.ideart join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by O.numofs, A.libar1, CE.codcpt, CE.datdem, O.qtepre;"
-      getDataAPR(clientProdQuery, function(result){
+      lxpConnector(clientProdQuery, function(result){
         if(moResult.length>0){
           var queryMO = "INSERT INTO mo (mo, client, product, date_debut_prevu, date_demandee, qte_prevu, status, quantite_produit) VALUES ('"+mo+"','"+result[0].libar1+"','"+result[0].codcpt+"', '"+result[0].datdebpre+"', '"+result[0].datdem+"', "+result[0].qtpre+", 'Planned', 0)"
         } else {
@@ -373,16 +374,16 @@ exports.stopCPSControl = function(req, res){
         }
         odbcConnector(queryMO, function(resultMO){         
           var query = "select OG.numofs, O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs where OG.numofs like '"+mo+"'  group by OG.numofs, O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree;"
-          getDataAPR(query, function(globalResult){
+          lxpConnector(query, function(globalResult){
             console.log(globalResult);
             var quantityDayQuery = "select sum(qtefai) as qtefai, datfinree from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinree"
-            getDataAPR(quantityDayQuery, function(QuantityDayResult){
+            lxpConnector(quantityDayQuery, function(QuantityDayResult){
               console.log(QuantityDayResult);
               var objectiveQuantityQuery = "select sum(OP.qtepre) as qtepre from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"';"
-              getDataAPR(objectiveQuantityQuery, function(ObjectiveResult){
+              lxpConnector(objectiveQuantityQuery, function(ObjectiveResult){
                 console.log(ObjectiveResult);
                 var targetQuantityQuery = "select sum(OP.qtepre) as qtepre, datfinpre from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinpre;"
-                getDataAPR(targetQuantityQuery, function(targetResult){
+                lxpConnector(targetQuantityQuery, function(targetResult){
                   console.log(targetResult);
                   var issueQuery = "select * from issue where mo='"+mo+"'";
                   odbcConnector(issueQuery, function(issueResult){
@@ -404,7 +405,15 @@ exports.stopCPSControl = function(req, res){
   exports.getWatchList = function(req, res){
     var ope = req.params.ope;
     var query = "select distinct O.numofs, A.libar1, datdebpre,min(OP.datdebree) as datdebree, datfinpre, max(OP.datfinree) as datfinree, OP.qtepre, OP.qtefai from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope left join ofsres R on OP.ideope=R.ideope join artgen A on O.ideart=A.ideart where datdebpre > (select OP.datfinree from ofsope OP where OP.ideope like '"+ope+"') and (R.ideres in (select ideres from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofsres R on OP.ideope=R.ideope where OP.ideope like '"+ope+"') or OC.ideart in (select OC.ideart from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope where OP.ideope like '"+ope+"')) group by O.numofs, datdebpre, R.ideres, OC.ideart, A.libar1, datfinpre, OP.qtepre, OP.qtefai having min(OP.datdebree) is null order by datdebpre;"
-    getDataAPR(query, function(result){
+    lxpConnector(query, function(result){
+      res.send(result);
+    })
+  }
+
+  exports.getIssues = function(req, res){
+    var mo = req.params.mo;
+    var query = "SELECT * FROM issue WHERE mo=" + mo;
+    odbcConnector(query, function(result){
       res.send(result);
     })
   }
@@ -460,11 +469,11 @@ exports.stopCPSControl = function(req, res){
     query+=" from artgen A join ofsgen O on A.ideart=O.ideart left join cdelig C on A.ideart=C.ideart left join ofssof OS on O.ideofs=OS.ideofs left join cdalig CA on CA.ideart=A.ideart left join cdaent CE on CA.idedoc=CE.idedoc"
     query+=" where O.numofs like '"+mo+"'"
     console.log(query)
-    getDataAPR(query, function(result){
+    lxpConnector(query, function(result){
       console.log(result)
       var query2 = "select C.idelig, C.datdem, A.ideart, A.codart, A.libar1, CE.refcde, CE.codcpt , CE.idedoc, O.ideofs, O.numofs, O.datcre, O.qtepre, OS.idemvt as pere"
       query2+=" from artgen A join ofsgen O on A.ideart=O.ideart left join cdelig C on A.ideart=C.ideart left join ofssof OS on O.ideofs=OS.ideofs left join cdalig CA on CA.ideart=A.ideart left join cdaent CE on CA.idedoc=CE.idedoc"
-      getDataAPR(query2, function(globalResult){
+      lxpConnector(query2, function(globalResult){
         for(i=0; i<result.length; i++){
           var j=0;
           var pere=result[i].pere;
@@ -562,7 +571,7 @@ exports.stopCPSControl = function(req, res){
     var query = 'select * from product_sequence where groupe = '+groupe+' order by pere';
     odbcConnector(query, function(tab){
       var querylxp ="select O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+tab[0].of+"' group by OP.ideofs) and numofs like '"+tab[0].of+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+tab[0].of+"' group by OP.ideofs) and numofs like '"+tab[0].of+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs where OG.numofs like '"+tab[0].of+"'  group by O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree;"
-      getDataAPR(querylxp, function(resultAPR){
+      lxpConnector(querylxp, function(resultAPR){
         if(tab[0].manufacturer=='APR'){
           var json = {prod:tab[0].id,HTMLclass: "product-bot",text:{name:tab[0].product, numofs:tab[0].of, datdebpre:'Beg:'+dateformat(new Date(resultAPR[0].datdebpre),"dd/mm/yyyy"),datdebree:'Real:'+dateformat(new Date(resultAPR[0].datdebree),"dd/mm/yyyy"), datfinpre:'End:'+dateformat(new Date(resultAPR[0].datfinpre),"dd/mm/yyyy"), datfinree:'Real:'+dateformat(new Date(resultAPR[0].datfinree),"dd/mm/yyyy"), qty:'Quantity:'+resultAPR[0].qtepre+'/'+resultAPR[0].qtefai}, children:[]};
         } else {
@@ -574,7 +583,7 @@ exports.stopCPSControl = function(req, res){
         for(i=1;i<tab.length;i++){
           done = false;
           var querylxp ="select O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+tab[i].of+"' group by OP.ideofs) and numofs like '"+tab[i].of+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+tab[i].of+"' group by OP.ideofs) and numofs like '"+tab[i].of+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs where OG.numofs like '"+tab[i].of+"'  group by O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree;"
-          getDataAPR(querylxp, function(result){
+          lxpConnector(querylxp, function(result){
             if(tab[i].pere==curpere){
               if(tab[i].manufacturer=='APR'){
                 curjson['children'].push({prod:tab[i].id,HTMLclass: "product-bot",text:{name:tab[i].product, numofs:tab[i].of, datdebpre:'Beg:'+dateformat(new Date(result[0].datdebpre),"dd/mm/yyyy"),datdebree:'Real:'+dateformat(new Date(result[0].datdebree),"dd/mm/yyyy"), datfinpre:'End:'+dateformat(new Date(result[0].datfinpre),"dd/mm/yyyy"), datfinree:'Real:'+dateformat(new Date(result[0].datfinree),"dd/mm/yyyy"), qty:'Quantity:'+result[0].qtepre+'/'+result[0].qtefai}, children:[]})
@@ -644,7 +653,7 @@ exports.stopCPSControl = function(req, res){
     try{
       const id = {
         host : lxp_url,
-        path: '/api/lxpModels/executeQuerry?request='+escape(request),
+        path: '/lxpConnector/v1/api/lxpModels/getData?query='+escape(request),
         port: lxp_port,
         method: 'GET',
         headers: {
@@ -661,11 +670,12 @@ exports.stopCPSControl = function(req, res){
         response.on('end', function(){
           console.log(str);
           var result = JSON.parse(str);
-          callback(result.request);
+          console.log(result)
+          callback(result.data);
         })
       }
 
-      const idReq = http.request(id, idCallback);
+      const idReq = https.request(id, idCallback);
       idReq.end();
     } catch(err){
       console.log(err)

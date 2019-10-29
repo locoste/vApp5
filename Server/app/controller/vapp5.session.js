@@ -127,7 +127,6 @@ function odbcConnector(request, callback){
   try {
     const id = {
       host : odbc_url,
-      //path: '/api/odbcModels/requestdb?request='+escape(request),
       path: '/odbcvApp5/v1/api/odbcModels/requestdb?request='+escape(request),
       port: odbc_port,
       method: 'GET',
