@@ -516,7 +516,7 @@ exports.stopCPSControl = function(req, res){
     query+=" where O.numofs like '"+mo+"'"
     console.log(query)
     lxpConnector(query, function(result){
-      console.log(result)
+      //console.log(result)
       var query2 = "select C.idelig, C.datdem, A.ideart, A.codart, A.libar1, CE.refcde, CE.codcpt , CE.idedoc, O.ideofs, O.numofs, O.datcre, O.qtepre, OS.idemvt as pere"
       query2+=" from artgen A join ofsgen O on A.ideart=O.ideart left join cdelig C on A.ideart=C.ideart left join ofssof OS on O.ideofs=OS.ideofs left join cdalig CA on CA.ideart=A.ideart left join cdaent CE on CA.idedoc=CE.idedoc"
       lxpConnector(query2, function(globalResult){
@@ -529,10 +529,10 @@ exports.stopCPSControl = function(req, res){
           var quantity = result[i].qtepre;
           var idcmde = result[i].idedoc;
           if(pere!=null){
-            console.log(pere)
+            //console.log(pere)
             while(j<globalResult.length){
               if(pere==globalResult[j].ideofs){
-                console.log(globalResult[j].ideart)
+                //console.log(globalResult[j].ideart)
                 product = globalResult[j].ideart
                 mo=globalResult[j].ideofs;
                 date=globalResult[j].datdem;
@@ -564,9 +564,8 @@ exports.stopCPSControl = function(req, res){
       if(finalProduct[i].length>0){
         for(j=0; j<finalProduct[i].length;j++){
           done=false;
-          console.log(finalProduct[i][j]);
+          //console.log(finalProduct[i][j]);
           schedulerConnector(finalProduct[i][j][0],finalProduct[i][j][1],finalProduct[i][j][2],finalProduct[i][j][3],finalProduct[i][j][4], function(result){
-            console.log(result)
             res.push(result);
             done=true;
           })
@@ -574,7 +573,7 @@ exports.stopCPSControl = function(req, res){
         }
       }
     }
-    console.log('res: '+JSON.stringify(res))
+    console.log(res)
     for(k=0; k<res.length; k++){
       var doneProduct = false;
       var transfert = 0;
@@ -715,9 +714,9 @@ function lxpConnector(request, callback){
       });
 
       response.on('end', function(){
-        console.log(str);
+        //console.log(str);
         var result = JSON.parse(str);
-        console.log(result)
+        //console.log(result)
         callback(result.data);
       })
     }
@@ -752,6 +751,6 @@ function schedulerConnector(art, datedem, qteDem, mo, company, callback){
     })
   }
 
-  const idReq = http.request(id, idSchedulerCallback);
+  const idReq = https.request(id, idSchedulerCallback);
   idReq.end();
 }
