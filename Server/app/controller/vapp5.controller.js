@@ -290,14 +290,10 @@ exports.displayLoginPage = function(req, res) {
 
 exports.startCPSControl = function(req, res){
   // pub/sub
+  var mo = req.params.mo;
   try{
-    CPScontrole = setInterval(function(){
-      var nbBlob = Math.floor(Math.random() * Math.floor(9));
-      var bayeux = new faye.NodeAdapter({mount: '/cps'});
-      bayeux.getClient().publish('/cps/control', {blob:nbBlob});
-      console.log(bayeux);
-      console.log(nbBlob);
-    }, 2000);
+    CPSControleFunction(mo)
+    res.send({message:'control begin'})
   } catch(err){
     console.log(err)
   }
@@ -306,11 +302,57 @@ exports.startCPSControl = function(req, res){
 exports.stopCPSControl = function(req, res){
   try{
     clearInterval(CPScontrole);
-    console.log('cps stopped');
-    res.send('control stopped');
+    res.send({message:'control stopped'});
   } catch(err){
     console.log(err)
     res.send(err);
+  }
+}
+
+function CPSControleFunction(control){
+  try{
+      var controlSize = 0;
+      var action;
+      var queryControl = 'select mo, product, cps, measure, max_tolerance from control where id='+control
+      odbcConnector(queryControl, function(resultControl){
+        var querySize = 'select control_size from control where id='+control
+        odbcConnector(querySize, function(resultSize){
+          controlSize = resultSize[0].control_size;
+          console.log('size total: '+controlSize)
+          // beginning of the control
+          CPScontrole = setInterval(function(){
+            // get the current number of piece
+            var queryCurSize = 'select count(id) as size from product_control where control = '+control
+            odbcConnector(queryCurSize, function(resultCurSize){
+              console.log(resultCurSize[0].size)
+              // if the number of control is equal of the control size we stop the control
+              if(Number(resultCurSize[0].size)>=controlSize){
+                clearInterval(CPScontrole);
+              } else {
+                var nbBlob = Math.floor(Math.random() * Math.floor(8));
+                var query = 'INSERT INTO product_control(nb_blob, control) VALUES ('+nbBlob+','+control+');';
+                console.log(query);
+                odbcConnector(query, function(result){
+                  action = '';
+                  if(nbBlob>resultControl[0].max_tolerance){
+                    var ok = 'NOK'
+                    action = 'Major'
+                  } else {
+                    var ok = 'OK'
+                    if(nbBlob>=Math.trunc(resultControl[0].max_tolerance*0.9)){
+                      action='Minor'
+                    }
+                  }
+                  bayeux.getClient().publish('/control', {mo:resultControl[0].mo, product:resultControl[0].product, cps:resultControl[0].cps, measure:resultControl[0].measure, tolerence:resultControl[0].max_tolerance, blob:nbBlob, ok:ok, action:action});
+                  console.log(nbBlob);
+                })
+              }
+            })
+          }, 4000);
+        })
+      })
+  } catch(err){
+    console.log(err)
   }
 }
 
@@ -475,10 +517,15 @@ exports.stopCPSControl = function(req, res){
   exports.newIssue = function(req, res){
     var body = req.body;
     var mo = req.params.mo;
-    var query = "INSERT INTO issue (type, description, mo, ope) VALUES ('"+body.type+"','"+body.description+"','"+mo+"', '"+body.ope+"')";
-    odbcConnector(query, function(result){
-      res.send(result);
-    })
+    for(i=0;i<body.occurence;i++){
+      done=false
+      var query = "INSERT INTO issue (type, description, mo, ope) VALUES ('"+body.type+"','"+body.description+"','"+mo+"', '"+body.ope+"')";
+      odbcConnector(query, function(result){
+        done=true
+      })
+      require('deasync').loopWhile(function(){return !done;});
+    }
+    res.send({message:'issue added'});
   }
 
   exports.getProductSequence = function(req, res){
