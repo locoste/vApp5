@@ -43,9 +43,15 @@ window.onclick = function(event) {
 
 	});
 
-	$http.get('http://'+url+':'+port+'/getProductSequence/' + mo, {headers : {'Content-Type' : 'application/json'}}).then(function(response) {
-		console.log("getProductSequence: ",response);
+	$http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Type' : 'application/json'}}).then(function(response) {
+    console.log("getOperations: ",response);
+    $scope.operations=response.data;
 	});
+
+
+	/*$http.get('http://'+url+':'+port+'/getProductSequence/' + mo, {headers : {'Content-Type' : 'application/json'}}).then(function(response) {
+		console.log("getProductSequence: ",response);
+	});*/
 
 	$http.get('http://'+url+':'+port+'/getIssues/'+ mo).then(function(response){
 		$scope.issues=response.data
@@ -60,6 +66,10 @@ window.onclick = function(event) {
 		$scope.User = response.data[0].company;
 	});
 	
+	$scope.selectOpe = function(ope){
+		var selectedOpe=ope;
+		$scope.selectedOpe=selectedOpe;
+	}
 
 	$scope.logout = function(){
 		$http.post('http://'+url+':'+port+'/logout').then(function(response){console.log(response)})

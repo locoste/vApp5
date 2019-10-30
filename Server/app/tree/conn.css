@@ -1,0 +1,48 @@
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td { margin:0; padding:0; }
+
+
+body { background: #fff; font-family: Calibri,serif; color: #444444; }
+
+/* optional Container STYLES */
+
+.node.big-commpany { 
+	cursor: pointer;
+	padding: 0 2px;
+	min-width: 250px;
+	text-align: center;
+	height: 35px;
+	border: 2px solid #E8E8E3; 
+	border-radius: 2px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.5);
+	background: #E1E7F3; 
+}
+.node.big-commpany:active { 
+	box-shadow: inset 1px 1px 1px rgba(0,0,0,.1); 
+	margin: 1px 0 0 1px; 
+	border: 2px solid #D3D3CB;
+}
+
+.node.big-commpany .node-name {
+	line-height: 30px;
+	color: #223250; /*after click*/
+}
+
+.node.big-commpany:hover .node-name {
+	color: #8B8B8B;
+	text-shadow: 1px 1px rgba(0,0,0,.15);
+}
+
+
+/* optional Container STYLES */
+.chart { height: 80vh; width: 100%; margin: 5px; margin: 5px auto;}
+.node {color: #9CB5ED; border: 2px solid #C8C8C8; border-radius: 3px; background: #fff; transition: background 0.7s, color 0.7s; }
+.node p { font-size: 17px; line-height: 20px; height: 20px; font-weight: bold; padding: 3px; margin: 0; }
+
+.node.product-bot {font-size: 15px}
+.node.product-bot p.node-numofs {top: -15px; font-size: 15px; position: absolute;  z-index: -1; transition: top 1s, opacity 0.5s;opacity: 1; top: 35px;  }
+.node.product-bot p.node-affect {top: -15px; font-size: 15px; position: absolute;  z-index: -1; transition: top 1s, opacity 0.5s;opacity: 1; top: 35px;  left: 130px;}
+.node.product-bot p.node-datdebpre { top: -15px; font-size: 15px; position: absolute; opacity: 1; z-index: -1; transition: top 1s, opacity 0.5s;top: 55px; }
+.node.product-bot p.node-datdebree { top: -15px; font-size: 15px; position: absolute; opacity: 1; z-index: -1; transition: top 1s, opacity 0.5s; top: 55px; left: 130px;}
+.node.product-bot p.node-datfinpre { top: -15px; font-size: 15px; position: absolute; opacity: 1; z-index: -1; transition: top 1s, opacity 0.5s; top: 75px; }
+.node.product-bot p.node-datfinree { top: -15px; font-size: 15px; position: absolute; opacity: 1; z-index: -1; transition: top 1s, opacity 0.5s; top: 75px; left: 130px;}
+.node.product-bot p.node-qty { top: -15px; font-size: 15px; position: absolute; opacity: 1; z-index: -1; transition: top 1s, opacity 0.5s; top: 95px; }

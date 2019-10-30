@@ -106,6 +106,9 @@ module.exports = function(app) {
     // get all MO
     app.get('/getAllMO'/*, contSession.authrequired*/, controller.getAllMO);
 
+    // get Operations related to the MO
+    app.get('/getOperations/:mo'/*, contSession.authrequired*/, controller.getOperations);
+
     // start a CPS control on an operation of a Manufacturing Order
     app.post('/startCPSControl'/*, contSession.authrequired*/, controller.startCPSControl);
 
@@ -132,4 +135,7 @@ module.exports = function(app) {
 
     // get watch list from an operation
     app.get('/getWatchList/:ope'/*, contSession.authrequired*/, controller.getWatchList);
+
+    // get treant files
+    app.get('/Vapp5/tree/:page' /*,contSession.authrequired*/, controller.getTreantFile);
 }

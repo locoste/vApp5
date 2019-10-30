@@ -448,6 +448,14 @@ exports.stopCPSControl = function(req, res){
     })
   }
 
+  exports.getOperations = function(req,res){
+    var mo = req.params.mo;
+    var query = "SELECT OP.codope, OP.libope, OP.datdebree, OP.datfinree, OP.qtefai FROM ofsope OP JOIN ofsgen O ON O.ideofs=OP.ideofs WHERE O.numofs="+mo;
+    lxpConnector(query, function(result){
+      res.send(result);
+    })    
+  }
+
   exports.getWatchList = function(req, res){
     var ope = req.params.ope;
     var query = "select distinct O.numofs, A.libar1, datdebpre,min(OP.datdebree) as datdebree, datfinpre, max(OP.datfinree) as datfinree, OP.qtepre, OP.qtefai from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope left join ofsres R on OP.ideope=R.ideope join artgen A on O.ideart=A.ideart where datdebpre > (select OP.datfinree from ofsope OP where OP.ideope like '"+ope+"') and (R.ideres in (select ideres from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofsres R on OP.ideope=R.ideope where OP.ideope like '"+ope+"') or OC.ideart in (select OC.ideart from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope where OP.ideope like '"+ope+"')) group by O.numofs, datdebpre, R.ideres, OC.ideart, A.libar1, datfinpre, OP.qtepre, OP.qtefai having min(OP.datdebree) is null order by datdebpre;"
@@ -753,4 +761,74 @@ function schedulerConnector(art, datedem, qteDem, mo, company, callback){
 
   const idReq = https.request(id, idSchedulerCallback);
   idReq.end();
+}
+
+exports.getTreantFile = function(req, res){
+  var page = req.params.page;
+  var path = '';
+  switch(page){
+    case 'app.js':
+    path = page;
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    break;
+    case 'Treant.css':
+    path = 'treant-js/'+page;
+    res.writeHead(200, {"Content-Type": "text/css"});
+    break;
+    case 'conn.css':
+    path = page;
+    res.writeHead(200, {"Content-Type": "text/css"});
+    break;
+    case 'controller.js':
+    path = page;
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    break;
+    case 'jquery.min.js':
+    path = 'treant-js/vendor/'+page;
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    break;
+    case 'jquery.easing.js':
+    path = 'treant-js/vendor/'+page;
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    break;
+    case 'raphael.js':
+    path = 'treant-js/vendor/'+page;
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    break;
+    case 'Treant.js':
+    path = 'treant-js/'+page;
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    break;
+  }
+  fs.readFile('./Server/app/tree/'+path, function(err, js){
+    if(err){
+      throw err;
+    }
+    res.write(js);
+    res.end();
+  })
+}
+
+exports.getTreantVendorFile = function(req, res){
+  var page = req.params.page;
+  res.writeHead(200, {"Content-Type": "text/plain"});
+  fs.readFile('./Server/app/treant-js-master/vendor/'+page, function(err, js){
+    if(err){
+      throw err;
+    }
+    res.write(js);
+    res.end();
+  })
+}
+
+exports.getTreantCssFile = function(req, res){
+  var page = req.params.page;
+  res.writeHead(200, {"Content-Type": "text/css"});
+  fs.readFile('./Server/app/treant-js-master/'+page, function(err, js){
+    if(err){
+      throw err;
+    }
+    res.write(js);
+    res.end();
+  })
 }

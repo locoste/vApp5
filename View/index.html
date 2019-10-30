@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="tree/Treant.css">
+    <link rel="stylesheet" href="tree/conn.css">
+</head>
+
+<body ng-app="app">
+
+    <div ng-controller="CustomController">
+      <div id="productionSequence"> </div>
+      {{nodeSelectedLast}}
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="tree/app.js"></script>
+    <script src="tree/controller.js"></script>
+    <script src="tree/jquery.min.js"></script>
+    <script src="tree/jquery.easing.js"></script>
+
+    <!-- I could not find the bower files -->
+    <script src="tree/raphael.js"></script>
+    <script src="tree/Treant.js"></script>
+
+    <script>new Treant(simple_chart_config);</script>
+
+</body>
+
+</html>
