@@ -91,6 +91,10 @@ module.exports = function(app) {
     // get 3D script 
     app.get('/Vapp5/js/:script'/*, contSession.authrequired*/, controller.get3DScript);
 
+    app.get('/Vapp5/components/:pathOne/:pathTwo/:script'/*, contSession.authrequired*/, controller.getFayeComponentOne);
+    app.get('/Vapp5/components/:pathOne/:script'/*, contSession.authrequired*/, controller.getFayeComponentTwo);
+    app.get('/Vapp5/faye/browser/:script'/*, contSession.authrequired*/, controller.getFaye);
+
     // display all project page
     app.get('/Vapp5/controller/:script'/*, contSession.authrequired*/, controller.getController);
 

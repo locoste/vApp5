@@ -1,4 +1,4 @@
-app.controller('UserPage', function($scope, $http, config) {
+app.controller('UserPage', function($scope, $http, config, Faye) {
   const url = config.api_url;
   const port = config.api_port;
   var project = getProject();

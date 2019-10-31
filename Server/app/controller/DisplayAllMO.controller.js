@@ -1,4 +1,4 @@
-app.controller('DisplayAllMO', function($scope, $http, config) {
+app.controller('DisplayAllMO',function($scope, $http, config, Faye) {
   const url = config.api_url;
   const port = config.api_port;
 

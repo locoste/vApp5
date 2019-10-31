@@ -152,6 +152,59 @@ exports.displayLoginPage = function(req, res) {
     }
   }
 
+  exports.getFayeComponentOne = function(req, res){
+    try{
+      var script = req.params.script;
+      var path1 = req.params.pathOne;
+      var path2 = req.params.pathTwo;
+      console.log(script)
+      res.writeHead(200, {"Content-Type": "text/plain"});
+      fs.readFile('./faye/components/'+path1+'/'+path2+'/'+script, function(err, js){
+        if(err){
+          throw err;
+        }
+        res.write(js);
+        res.end();
+      })
+    } catch(err){
+      res.send(err)
+    }
+  }
+
+  exports.getFayeComponentTwo = function(req, res){
+    try{
+      var script = req.params.script;
+      var path1 = req.params.pathOne;
+      console.log(script)
+      res.writeHead(200, {"Content-Type": "text/plain"});
+      fs.readFile('./faye/components/'+path1+'/'+script, function(err, js){
+        if(err){
+          throw err;
+        }
+        res.write(js);
+        res.end();
+      })
+    } catch(err){
+      res.send(err)
+    }
+  }
+
+  exports.getFaye = function(req, res){
+    try{
+      var script = req.params.script;
+      res.writeHead(200, {"Content-Type": "text/plain"});
+      fs.readFile('./faye/faye/browser/'+script, function(err, js){
+        if(err){
+          throw err;
+        }
+        res.write(js);
+        res.end();
+      })
+    } catch(err){
+      res.send(err)
+    }
+  }
+
   exports.getController = function(req, res) {
     try{
       var script = req.params.script;
@@ -309,48 +362,41 @@ exports.stopCPSControl = function(req, res){
   }
 }
 
-function CPSControleFunction(control){
+function CPSControleFunction(mo){
   try{
       var controlSize = 0;
-      var action;
-      var queryControl = 'select mo, product, cps, measure, max_tolerance from control where id='+control
-      odbcConnector(queryControl, function(resultControl){
-        var querySize = 'select control_size from control where id='+control
-        odbcConnector(querySize, function(resultSize){
-          controlSize = resultSize[0].control_size;
+      var min = 0;
+      var max = 6;
+      var queryControl = "select qtepre from ofsgen where numofs='"+mo+"'"
+      lxpConnector(queryControl, function(resultControl){
+          controlSize = Math.round(Number(resultControl[0].qtepre)/10);
           console.log('size total: '+controlSize)
           // beginning of the control
           CPScontrole = setInterval(function(){
             // get the current number of piece
-            var queryCurSize = 'select count(id) as size from product_control where control = '+control
+            var queryCurSize = "select count(mo) as size from control where mo = '"+mo+"'"
             odbcConnector(queryCurSize, function(resultCurSize){
-              console.log(resultCurSize[0].size)
+              console.log(resultCurSize)
               // if the number of control is equal of the control size we stop the control
               if(Number(resultCurSize[0].size)>=controlSize){
                 clearInterval(CPScontrole);
               } else {
                 var nbBlob = Math.floor(Math.random() * Math.floor(8));
-                var query = 'INSERT INTO product_control(nb_blob, control) VALUES ('+nbBlob+','+control+');';
+                var query = 'INSERT INTO control(min, max, control, mo) VALUES ('+min+','+max+','+nbBlob+','+mo+');';
                 console.log(query);
                 odbcConnector(query, function(result){
-                  action = '';
-                  if(nbBlob>resultControl[0].max_tolerance){
+                  if(nbBlob>max){
                     var ok = 'NOK'
-                    action = 'Major'
                   } else {
                     var ok = 'OK'
-                    if(nbBlob>=Math.trunc(resultControl[0].max_tolerance*0.9)){
-                      action='Minor'
-                    }
                   }
-                  bayeux.getClient().publish('/control', {mo:resultControl[0].mo, product:resultControl[0].product, cps:resultControl[0].cps, measure:resultControl[0].measure, tolerence:resultControl[0].max_tolerance, blob:nbBlob, ok:ok, action:action});
+                  bayeux.getClient().publish('/control', {measure:'Apperance', min:min, max:max, control:nbBlob, status:ok});
                   console.log(nbBlob);
                 })
               }
             })
           }, 4000);
         })
-      })
   } catch(err){
     console.log(err)
   }
@@ -464,13 +510,13 @@ function CPSControleFunction(control){
           var query = "select OG.numofs, O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs where OG.numofs like '"+mo+"'  group by OG.numofs, O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree;"
           lxpConnector(query, function(globalResult){
             console.log(globalResult);
-            var quantityDayQuery = "select sum(qtefai) as qtefai, datfinree from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinree"
+            var quantityDayQuery = "select sum(qtefai) as qtefai, datfinree from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinree order by datfinree"
             lxpConnector(quantityDayQuery, function(QuantityDayResult){
               console.log(QuantityDayResult);
               var objectiveQuantityQuery = "select sum(OP.qtepre) as qtepre from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"';"
               lxpConnector(objectiveQuantityQuery, function(ObjectiveResult){
                 console.log(ObjectiveResult);
-                var targetQuantityQuery = "select sum(OP.qtepre) as qtepre, datfinpre from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinpre;"
+                var targetQuantityQuery = "select sum(OP.qtepre) as qtepre, datfinpre from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinpre order by datfinpre;"
                 lxpConnector(targetQuantityQuery, function(targetResult){
                   console.log(targetResult);
                   var issueQuery = "select * from issue where mo='"+mo+"'";
