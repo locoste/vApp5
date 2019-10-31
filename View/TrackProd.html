@@ -331,73 +331,52 @@
                         <div class="col-lg-5">
                           <div class="row">
                             <h2>Pareto Chart</h2>
-                            <canvas id="pareto"></canvas>
-                            <script>
-                              var ctx = document.getElementById('pareto').getContext('2d');
-                              var chart = new Chart(ctx, {
-                      // The type of chart we want to create
-                      type: 'bar',
+                            <canvas id="pareto"></canvas>   
+                          </div>
+                        </div>
 
-                      // The data for our dataset
-                      data: {
-                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                        datasets: [{
-                          label: 'My First dataset',
-                          backgroundColor: 'rgb(255, 140, 132)',
-                          borderColor: 'rgb(255, 140, 132)',
-                          data: [0, 10, 5, 2, 20, 30, 45]
-                        }]
-                      },
+                      </div>
+                    </div>
+                    <div class="tab-pane" id="watchlist"> 
+                      <div class="row"> 
+                        <div class="col-lg-2">
+                          <h2 style="padding-top: 12px;">Tracking for OP</h2> 
+                        </div>
+                        <div class="col-lg-2">
+                          <input id="selectedOpe" ng-model="selectedOpe" style="padding-top: 12px;"></input>
+                        </div>
+                      </div>
+                      <table>
+                        <thead>
+                          <th>MO Num.</th><th>Product</th><th>Major Risk</th><th>Planned Start</th><th>Real Start</th><th>Planned End</th><th>Real End</th><th>Planned Qty</th><th>Released Qty</th>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="x in watchList">
+                            <td>{{x.numofs}}</td>
+                            <td>{{x.libar1}}</td>
+                            <td>{{x.majorRisk}}</td>
+                            <td>{{x.datdebpre | date : "dd/MM/yy"}}</td>
+                            <td>{{x.datdebree | date : "dd/MM/yy"}}</td>
+                            <td>{{x.datfinpre | date : "dd/MM/yy"}}</td>
+                            <td>{{x.datfinree | date : "dd/MM/yy"}}</td>
+                            <td>{{x.qtepre}}</td>
+                            <td>{{x.qtefai}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
 
-                      // Configuration options go here
-                      options: {}
-                    });
-                  </script>
-                </div>
-              </div>
+                </div> <!--Fin des onglets-->
 
+                <p></p>
+              </form>
             </div>
-          </div>
-          <div class="tab-pane" id="watchlist"> 
-            <div class="row"> 
-              <div class="col-lg-2">
-                <h2 style="padding-top: 12px;">Tracking for OP</h2> 
-              </div>
-              <div class="col-lg-2">
-                <input id="selectedOpe" ng-model="selectedOpe" style="padding-top: 12px;"></input>
-              </div>
-            </div>
-            <table>
-              <thead>
-                <th>MO Num.</th><th>Product</th><th>Major Risk</th><th>Planned Start</th><th>Real Start</th><th>Planned End</th><th>Real End</th><th>Planned Qty</th><th>Released Qty</th>
-              </thead>
-              <tbody>
-                <tr ng-repeat="x in watchList">
-                  <td>{{x.numofs}}</td>
-                  <td>{{x.libar1}}</td>
-                  <td>{{x.majorRisk}}</td>
-                  <td>{{x.datdebpre | date : "dd/MM/yy"}}</td>
-                  <td>{{x.datdebree | date : "dd/MM/yy"}}</td>
-                  <td>{{x.datfinpre | date : "dd/MM/yy"}}</td>
-                  <td>{{x.datfinree | date : "dd/MM/yy"}}</td>
-                  <td>{{x.qtepre}}</td>
-                  <td>{{x.qtefai}}</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
-
-      </div> <!--Fin des onglets-->
-
-      <p></p>
-    </form>
-  </div>
-</div>
-</div>
-</div>
-</div>
-<script src="./controller/Project.js"></script>
-<script src="./controller/TrackProd.controller.js"></script>
-</body>
-</html>
+      </div>
+    </div>
+    <script src="./controller/Project.js"></script>
+    <script src="./controller/TrackProd.controller.js"></script>
+  </body>
+  </html>
