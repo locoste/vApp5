@@ -500,16 +500,9 @@ function CPSControleFunction(control){
 
   exports.getWatchList = function(req, res){
     var ope = req.params.ope;
-    var query = "select distinct O.numofs, A.libar1, datdebpre,min(OP.datdebree) as datdebree, datfinpre, max(OP.datfinree) as datfinree, OP.qtepre, OP.qtefai from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope left join ofsres R on OP.ideope=R.ideope join artgen A on O.ideart=A.ideart where datdebpre > (select OP.datfinree from ofsope OP where OP.ideope like '"+ope+"') and (R.ideres in (select ideres from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofsres R on OP.ideope=R.ideope where OP.ideope like '"+ope+"') or OC.ideart in (select OC.ideart from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope where OP.ideope like '"+ope+"')) group by O.numofs, datdebpre, R.ideres, OC.ideart, A.libar1, datfinpre, OP.qtepre, OP.qtefai having min(OP.datdebree) is null order by datdebpre;"
-    lxpConnector(query, function(result){
-      res.send(result);
-    })
-  }
-
-  exports.getIssues = function(req, res){
     var mo = req.params.mo;
-    var query = "SELECT * FROM issue WHERE mo=" + mo;
-    odbcConnector(query, function(result){
+    var query = "select distinct O.numofs, A.libar1, datdebpre,min(OP.datdebree) as datdebree, datfinpre, max(OP.datfinree) as datfinree, OP.qtepre, OP.qtefai     from ofsope OP   join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope left join ofsres R on OP.ideope=R.ideope join artgen A on O.ideart=A.ideart where datdebpre > (select max(OP.datfinree) from ofsope OP join ofsgen O on OP.ideofs=O.ideofs where O.numofs like '"+mo+"') and (R.ideres in (select ideres from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofsres R on OP.ideope=R.ideope where OP.codope like '"+ope+"') or OC.ideart in (select distinct OC.ideart from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope where OP.codope like '"+ope+"')) group by O.numofs, datdebpre, R.ideres, OC.ideart, A.libar1, datfinpre, OP.qtepre, OP.qtefai having min(OP.datdebree) is null order by datdebpre;"
+    lxpConnector(query, function(result){
       res.send(result);
     })
   }
@@ -517,9 +510,10 @@ function CPSControleFunction(control){
   exports.newIssue = function(req, res){
     var body = req.body;
     var mo = req.params.mo;
+    var ope = req.params.ope;
     for(i=0;i<body.occurence;i++){
       done=false
-      var query = "INSERT INTO issue (type, description, mo, ope) VALUES ('"+body.type+"','"+body.description+"','"+mo+"', '"+body.ope+"')";
+      var query = "INSERT INTO issue (type, description, occurence, mo, ope) VALUES ('"+body.type+"','"+body.description+"','"+body.occurence+"','"+mo+"', '"+ope+"')";
       odbcConnector(query, function(result){
         done=true
       })

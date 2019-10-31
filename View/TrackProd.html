@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/css/vApp5.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
 
   <body>
     <div ng-app="Project">
@@ -104,14 +106,6 @@
                             <Input id="planned_qty" type="text" ng-model='planned_qty'></Input>
                           </div>
                         </div>
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <label>Released Qty</label>
-                          </div>
-                          <div class="col-lg-6">
-                            <Input id="released_qty" type="text" ng-model='released_qty'></Input>
-                          </div>
-                        </div>
                       </div>
 
                       <div class="col-lg-6"> <!--Deuxième colonne MO info-->
@@ -141,20 +135,13 @@
                         </div>
                         <div class="row">
                           <div class="col-lg-6">
-                            <label>Defect Product</label>
+                            <label>Released Qty</label>
                           </div>
                           <div class="col-lg-6">
-                            <Input></Input>
+                            <Input id="released_qty" type="text" ng-model='released_qty'></Input>
                           </div>
                         </div>
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <label>Critical Path</label>
-                          </div>
-                          <div class="col-lg-6">
-                            <Input></Input>
-                          </div>
-                        </div>
+
 
                       </div>
 
@@ -172,171 +159,174 @@
                           <tr ng-repeat="x in operations">
                             <td>{{x.codope}}</td>
                             <td>{{x.libope}}</td>
-                            <td>{{x.datdebree | date : "dd.MM.yy"}}</td>
-                            <td>{{x.datfinree | date : "dd.MM.yy"}}</td>
+                            <td>{{x.datdebree | date : "dd/MM/yy"}}</td>
+                            <td>{{x.datfinree | date : "dd/MM/yy"}}</td>
                             <td>{{x.qtefai}}</td>
                             <td><a ng-click="selectOpe(x.codope)"><i class="fas fa-info-circle"></i></a></td>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                </div>
-                <p class="sep_line"></p>
-
-                <div class="col-lg-10">
-                  <h2>Tracking for OP</h2>
-                    <input id="selectedOpe" ng-model="selectedOpe"></input>
-                  <!-- Les onglets -->
-                  <nav class="nav nav-tabs">
-                    <a class="nav-item nav-link active" href="#tracking" data-toggle="tab">Tracking</a>
-                    <a class="nav-item nav-link" href="#issues" data-toggle="tab">Issues</a>
-                    <a class="nav-item nav-link" href="#watchlist" data-toggle="tab">Watch List</a>
-                  </nav>
-                  <div class="tab-content">
-                    <div class="tab-pane active" id="tracking"> <!--ONGLET TRACKING-->
-                      <canvas id="trackingChart"></canvas>
-                      <script>
-                        var ctx = document.getElementById('trackingChart').getContext('2d');
-                        var chart = new Chart(ctx, {
-                      // The type of chart we want to create
-                      type: 'bar',
-
-                      // The data for our dataset
-                      data: {
-                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                        datasets: [{
-                          label: 'My First dataset',
-                          backgroundColor: 'rgb(255, 140, 132)',
-                          borderColor: 'rgb(255, 140, 132)',
-                          data: [0, 10, 5, 2, 20, 30, 45]
-                        }]
-                      },
-
-                      // Configuration options go here
-                      options: {}
-                    });
-                  </script>
-
-                </div>
-                <div class="tab-pane" id="issues">
-
-                  <div class="row">
-                    <div class="col-lg-7">
-                      <div class="row">
-                        <div class="col-lg-3">
-                          <h2>Cluster by :</h2>
-                        </div>
-                        <div class="col-lg-2">
-                         <button class="butn">Order</button>
-                       </div>
-                       <div class="col-lg-2">
-                         <button class="butn">Customer</button>
-                       </div>
-                     </div>
-                   </div>
-                   <p class="sep_line"></p>
-                 </div>
-                 <div class="row">
-                  <div class="col-lg-4">
-                    <div class="row">
-                      <h2>Quality Controls</h2>
-                      <table>
-                        <thead>
-                          <th>Measure</th><th>Min</th><th>Max</th><th>Control</th><th>Status</th>
-                        </thead>
-                        <tbody>
-                          <tr ng-repeat="x in qualityControls">
-                            <td>{{x.measure}}</td>
-                            <td>{{x.min}}</td>
-                            <td>{{x.max}}</td>
-                            <td>{{x.control}}</td>
-                            <td>{{x.status}}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <div class="blankspace50"></div>
-                    <div class="row">
-                      <h2>Current Issues</h2> 
-                      <button style="float:right;" class="butn" id="addIssueBtn">Add Issue</button>
-                    </div>
-                    <div class="row">
-                      <table>
-                        <thead>
-                          <th>Type</th><th>Occur.</th><th>%/Cluster</th>
-                        </thead>
-                        <tbody>
-                          <tr ng-repeat="x in issues">
-                            <td>{{x.type}}</td>
-                            <td>{{x.occurence}}</td>
-                            <td>{{x.percentage}}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <div class="row blankspace25"></div>
-
-                      
-                      <!-- The Modal -->
-                      <div id="addIssue" class="modal">
-                        <!-- Modal content -->
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h2 style="color:white;">Add New Issue</h2>
-                            <span class="close">&times;</span>
-                          </div>
-                          <div class="modal-body">
-                            <div class="row">
-                              <div class="col-lg-4">
-                                <p>Type</p>
-                              </div>
-                              <div class="col-lg-4">
-                                <p>Occurence</p>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-lg-4">
-                                <input text="Type"></input>
-                              </div>
-                              <div class="col-lg-4">
-                                <input text="Description"></input>
-                              </div>
-                              <div class="col-lg-4">
-                                <button class="butn">Save</button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
+                          </tbody>
+                        </table>
                       </div>
                     </div>
+
                   </div>
-                  <div class="col-lg-3">
-                    <div class="row">
-                      <h2>Known Issues</h2>
-                    </div>
-                    <div class="row">
-                      <table>
-                        <thead>
-                          <th>Type</th><th>Occur.</th> <th>% Occur.</th>
-                        </thead>
-                        <tbody>
-                          <tr ng-repeat="x in knownIssues">
-                            <td>{{x.type}}</td>
-                            <td>{{x.occurence}}</td>
-                            <td>{{x.percentage}}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-lg-5">
-                    <div class="row">
-                      <h2>Pareto Chart</h2>
-                      <canvas id="pareto"></canvas>
-                      <script>
-                        var ctx = document.getElementById('pareto').getContext('2d');
-                        var chart = new Chart(ctx, {
+                  <p class="sep_line"></p>
+
+                  <div class="col-lg-10">
+                    <!-- Les onglets -->
+                    <nav class="nav nav-tabs">
+                      <a class="nav-item nav-link active" href="#tracking" data-toggle="tab">Tracking</a>
+                      <a class="nav-item nav-link" href="#issues" data-toggle="tab">Issues</a>
+                      <a class="nav-item nav-link" href="#watchlist" data-toggle="tab">Watch List</a>
+                    </nav>
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="tracking"> <!--ONGLET TRACKING-->
+                        <canvas id="trackingChart"></canvas>
+
+                      </div>
+                      <div class="tab-pane" id="issues">
+                        <div class="row"> 
+                          <div class="col-lg-2">
+                            <h2 style="padding-top: 12px;">Tracking for OP</h2> 
+                          </div>
+                          <div class="col-lg-2">
+                            <input id="selectedOpe" ng-model="selectedOpe" style="padding-top: 12px;"></input>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-7">
+                            <div class="row">
+                              <div class="col-lg-3">
+                                <h2>Cluster by :</h2>
+                              </div>
+                              <div class="col-lg-2">
+                               <button class="butn">Order</button>
+                             </div>
+                             <div class="col-lg-2">
+                               <button class="butn">Customer</button>
+                             </div>
+                           </div>
+                         </div>
+                         <p class="sep_line"></p>
+                       </div>
+                       <div class="row">
+                        <div class="col-lg-4">
+                          <div class="row">
+                            <h2>Quality Controls</h2>
+                            <table>
+                              <thead>
+                                <th>Measure</th><th>Min</th><th>Max</th><th>Control</th><th>Status</th>
+                              </thead>
+                              <tbody>
+                                <tr ng-repeat="x in qualityControls">
+                                  <td>{{x.measure}}</td>
+                                  <td>{{x.min}}</td>
+                                  <td>{{x.max}}</td>
+                                  <td>{{x.control}}</td>
+                                  <td>{{x.status}}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <div class="blankspace50"></div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <h2>Current Issues</h2>
+                            </div>
+                            <div class="col-lg-6"> 
+                              <button style="float:right;" class="butn" id="addIssueBtn">Add Issue</button>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <table>
+                              <thead>
+                                <th>Type</th><th>Occur.</th><th>%/Cluster</th>
+                              </thead>
+                              <tbody>
+                                <tr ng-repeat="x in issues">
+                                  <td>{{x.type}}</td>
+                                  <td>{{x.occurence}}</td>
+                                  <td>{{x.percentage}}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <div class="row blankspace25"></div>
+
+
+                            <!-- The Modal -->
+                            <div id="addIssue" class="modal">
+                              <!-- Modal content -->
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h2 style="color:white;">Add New Issue</h2>
+                                  <span class="close">&times;</span>
+                                </div>
+                                <div class="modal-body">
+                                  <div class="row">
+                                    <div class="col-lg-2">
+                                      <p>Type</p>
+                                    </div>            
+                                    <div class="col-lg-3">
+                                      <select id="type">
+                                        <option>CAM</option>
+                                        <option>Human</option>
+                                        <option>Material</option>
+                                        <option>Tool</option>
+                                      </select>
+                                    </div>                 
+                                    <div class="col-lg-2">
+                                      <p>Occurence</p>
+                                    </div>
+                                    <div class="col-lg-2">
+                                      <input id="occurence" text="occurence"></input>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-12">
+                                      Description
+                                    </div>
+                                  </div>
+                                  <div class="row">
+
+                                    <div class="col-lg-12">
+                                      <textarea id="description" type="text" class="form-control" ng-model="description"></textarea>
+                                    </div>
+                                    <div class="row">
+                                      <p></p>
+                                      <button class="butn" ng-click="newIssue">Save</button>
+                                    </div>  
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-lg-3">
+                          <div class="row">
+                            <h2>Known Issues</h2>
+                          </div>
+                          <div class="row">
+                            <table>
+                              <thead>
+                                <th>Type</th><th>Occur.</th> <th>% Occur.</th>
+                              </thead>
+                              <tbody>
+                                <tr ng-repeat="x in knownIssues">
+                                  <td>{{x.type}}</td>
+                                  <td>{{x.occurence}}</td>
+                                  <td>{{x.percentage}}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div class="col-lg-5">
+                          <div class="row">
+                            <h2>Pareto Chart</h2>
+                            <canvas id="pareto"></canvas>
+                            <script>
+                              var ctx = document.getElementById('pareto').getContext('2d');
+                              var chart = new Chart(ctx, {
                       // The type of chart we want to create
                       type: 'bar',
 
@@ -361,22 +351,29 @@
             </div>
           </div>
           <div class="tab-pane" id="watchlist"> 
-            <table style="width: 150vh">
+            <div class="row"> 
+              <div class="col-lg-2">
+                <h2 style="padding-top: 12px;">Tracking for OP</h2> 
+              </div>
+              <div class="col-lg-2">
+                <input id="selectedOpe" ng-model="selectedOpe" style="padding-top: 12px;"></input>
+              </div>
+            </div>
+            <table>
               <thead>
-                <th>MO Num.</th><th>Date</th><th>Product</th><th>Major Risk</th><th>Planned Start</th><th>Real Start</th><th>Planned End</th><th>Real End</th><th>Planned Qty</th><th>Released Qty</th>
+                <th>MO Num.</th><th>Product</th><th>Major Risk</th><th>Planned Start</th><th>Real Start</th><th>Planned End</th><th>Real End</th><th>Planned Qty</th><th>Released Qty</th>
               </thead>
               <tbody>
                 <tr ng-repeat="x in watchList">
-                  <td>{{x.moNumber}}</td>
-                  <td>{{x.date}}</td>
-                  <td>{{x.product}}</td>
+                  <td>{{x.numofs}}</td>
+                  <td>{{x.libar1}}</td>
                   <td>{{x.majorRisk}}</td>
-                  <td>{{x.plannedStart}}</td>
-                  <td>{{x.realStart}}</td>
-                  <td>{{x.plannedEnd}}</td>
-                  <td>{{x.realEnd}}</td>
-                  <td>{{x.plannedQty}}</td>
-                  <td>{{x.releasedQty}}</td>
+                  <td>{{x.datdebpre | date : "dd/MM/yy"}}</td>
+                  <td>{{x.datdebree | date : "dd/MM/yy"}}</td>
+                  <td>{{x.datfinpre | date : "dd/MM/yy"}}</td>
+                  <td>{{x.datfinree | date : "dd/MM/yy"}}</td>
+                  <td>{{x.qtepre}}</td>
+                  <td>{{x.qtefai}}</td>
                 </tr>
               </tbody>
             </table>

@@ -124,17 +124,14 @@ module.exports = function(app) {
     // get every data of product tarking page
     app.get('/getProductionTracking/:mo'/*, contSession.authrequired*/, controller.getProductionTracking);
 
-    // Get issues
-    app.get('/getIssues/:mo'/*, contSession.authrequired*/, controller.getIssues);
-
     // new issue
-    app.post('/newIssue/:mo'/*, contSession.authrequired*/, controller.newIssue);
+    app.post('/newIssue/:mo/:ope'/*, contSession.authrequired*/, controller.newIssue);
 
     // get product sequence
     app.get('/getProductSequence/:mo'/*, contSession.authrequired*/, controller.getProductSequence);
 
     // get watch list from an operation
-    app.get('/getWatchList/:ope'/*, contSession.authrequired*/, controller.getWatchList);
+    app.get('/getWatchList/:mo/:ope'/*, contSession.authrequired*/, controller.getWatchList);
 
     // get treant files
     app.get('/Vapp5/tree/:page' /*,contSession.authrequired*/, controller.getTreantFile);

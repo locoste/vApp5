@@ -57,7 +57,7 @@
         	<tbody>
         		<tr ng-repeat="x in moInformation">
         			<td>{{x.numofs}}</td>
-        			<td>{{x.datdem}}</td>
+        			<td>{{x.datdem | date : "dd/MM/yy"}}</td>
         			<td>{{x.qtepre}}</td>
         			<td>{{x.libar1}}</td>
               <td><a ng-href="TrackProd.html?{{x.numofs}}"><i class="fas fa-info-circle fa-2x"></i></a></td>
