@@ -1,4 +1,4 @@
-var app = angular.module("Project", []);
+var app = angular.module("Project", ['faye']);
 
 app.constant('config', {  
   	api_url: 'localhost',
@@ -8,3 +8,7 @@ app.constant('config', {
     scan_url: 'vf-os1.univ-lyon2.fr',
     scan_port: '8243'
 });
+
+app.factory('Faye', ['$faye', function($faye) {
+  return $faye("http://localhost:8004/cps");
+}]);

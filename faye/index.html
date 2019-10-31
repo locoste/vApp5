@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ng" ng-app="simpleChat">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Chat Template of Bootstrap + Express + AngularJS</title>
+
+  <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script src='faye/browser/faye-browser.js'></script>
+
+  <script src="components/angular/angular.min.js"></script>
+  <script src="components/angularjs-scroll-glue/src/scrollglue.js"></script>
+  <script src="components/angular-strap/dist/angular-strap.min.js"></script>
+  <script src="components/angular-strap/dist/angular-strap.tpl.min.js"></script>
+  <script src='components/angular-faye/build/angular-faye.js'></script>
+  <script src='js/main.js'></script>
+
+</head>
+<body>
+  <div class="container"  ng-controller="ChatCtrl">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>Simple Chat App</h1>
+        <h4>AngularJS + Bootstrap + Faye + Express</h4>
+        <div scroll-glue class="messages">
+          <div ng-repeat="msgs in chatMessages" class="message">
+            <label>User {{msgs.user}}</label> 
+            :
+            <span>{{msgs.mo}}</span>
+            <span>{{msgs.product}}</span>
+            <span>{{msgs.cps}}</span>
+            <span>{{msgs.measure}}</span>
+            <span>{{msgs.tolerence}}</span>
+            <span>{{msgs.blob}}</span>
+            <span>{{msgs.ok}}</span>
+          </div>
+          <div class="message" ng-show="chatMessages && chatMessages.length == 0">
+            <span>Welcome to the chat room!!</span>
+          </div>
+        </div>
+        <input type="text" placeholder="Press ENTER to send message" class="form-control" ng-model="message" ng-keypress="sendMessage($event)"></textarea>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
