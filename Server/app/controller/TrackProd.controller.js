@@ -110,6 +110,7 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
 		console.log("getProductionTracking: ",response.data);
 
 		$scope.mo_number=response.data.globalInformation[0][0].numofs;
+		$scope.product=response.data.globalInformation[0][0].libar1;
 		$scope.planned_start=response.data.globalInformation[0][0].datdebpre;
 		$scope.real_start=response.data.globalInformation[0][0].datdebree;
 		$scope.planned_end=response.data.globalInformation[0][0].datfinpre;
@@ -244,9 +245,9 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 		console.log('ope', ope)
 		$scope.selectedOpe=ope;
 		$http.get('http://'+url+':'+port+'/getWatchList/'+mo+'/'+$scope.selectedOpe).then(function(response){
-		console.log("getWatchList: ",response);
-		$scope.watchList = response.data;
-	});
+			console.log("getWatchList: ",response.data);
+			$scope.watchList = response.data;
+		});
 	}
 
 	$scope.logout = function(){
@@ -304,9 +305,10 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 		for (let line in tabIssue){
 			label.push(tabIssue[line].type);
 			percentage.push(tabIssue[line].percentage);
-			sum+=tabIssue[line].percentage;
+			sum+=Number(tabIssue[line].percentage);
 			sumPercentage.push(sum);
 		}
+		console.log('sumPercentage',sumPercentage)
 
 		var percentageDS = {
 			label: 'Percentage per issue',

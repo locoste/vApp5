@@ -317,7 +317,7 @@ exports.displayLoginPage = function(req, res) {
 
   exports.getAllMO = function(req, res){
     try{
-      var query = 'select numofs, C.datdem, qtepre, A.libar1 from ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on CL.idedoc=C.idedoc join artgen A on O.ideart=A.ideart where C.datdem is not null order by numofs desc'
+      var query = 'select numofs, C.datdem, qtepre, A.libar1 from ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on CL.idedoc=C.idedoc join artgen A on O.ideart=A.ideart where C.datdem is not null order by C.datdem desc'
       console.log(query)
       lxpConnector(query, function(result){
         res.send(result);
@@ -508,7 +508,7 @@ function CPSControleFunction(mo){
         }
         console.log('queryMO: '+queryMO);
         odbcConnector(queryMO, function(resultMO){         
-          var query = "select OG.numofs, O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs where OG.numofs like '"+mo+"'  group by OG.numofs, O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree;"
+          var query = "select OG.numofs, A.libar1, O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs join artgen A on OG.ideart=A.ideart where OG.numofs like '"+mo+"'  group by OG.numofs, O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree, A.libar1;"
           lxpConnector(query, function(globalResult){
             console.log(globalResult);
             var quantityDayQuery = "select sum(qtefai) as qtefai, datfinree from ofsgen O join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by datfinree order by datfinree"
