@@ -76,7 +76,16 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
       },
 
       // Configuration options go here
-      options: {}
+      options: {
+      	yAxes: [{
+        	ticks: {
+        		min: 0
+        	},
+        	scaleLabel: {
+        		display:     true,
+        		labelString: 'percentage per day'
+        	}
+        }]}
   });
 
 	// Get the modal
