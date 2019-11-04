@@ -501,11 +501,12 @@ function CPSControleFunction(mo){
     odbcConnector(queryMO, function(moResult){
       var clientProdQuery = "select O.numofs, A.libar1, CE.codcpt, min(OP.datdebpre) as datdebpre, CE.datdem, O.qtepre from ofscde OC join cdelig CL on OC.idelig=CL.idelig join cdeent CE on CL.idedoc=CE.idedoc join ofsgen O on O.ideofs=OC.ideofs join artgen A on O.ideart=A.ideart join ofsope OP on O.ideofs=OP.ideofs where numofs like '"+mo+"' group by O.numofs, A.libar1, CE.codcpt, CE.datdem, O.qtepre;"
       lxpConnector(clientProdQuery, function(result){
-        if(moResult.length>0){
-          var queryMO = "INSERT INTO mo (mo, client, product, date_debut_prevu, date_demandee, qte_prevu, status, quantite_produit) VALUES ('"+mo+"','"+result[0].libar1+"','"+result[0].codcpt+"', '"+result[0].datdebpre+"', '"+result[0].datdem+"', "+result[0].qtpre+", 'Planned', 0)"
+        if(moResult.length==0){
+          var queryMO = "INSERT INTO mo (mo, client, product, date_debut_prevu, date_demandee, qte_prevu, status, quantite_produit) VALUES ('"+mo+"','"+result[0].codcpt+"','"+result[0].libar1+"', '"+result[0].datdebpre+"', '"+result[0].datdem+"', "+result[0].qtepre+", 'Planned', 0)"
         } else {
           var queryMO = "select * from mo"
         }
+        console.log('queryMO: '+queryMO);
         odbcConnector(queryMO, function(resultMO){         
           var query = "select OG.numofs, O.qtepre, min(O.qtefai) as qtefai, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree from ofsope O join (  select ideope, datdebpre, datdebree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select min(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as S on O.ideope=S.ideope join (select OP.ideofs, datfinpre, datfinree from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where codope=(select max(codope) from ofsope OP join ofsgen OG on OP.ideofs=OG.ideofs where numofs like '"+mo+"' group by OP.ideofs) and numofs like '"+mo+"') as SS on O.ideofs=SS.ideofs join ofsgen OG on O.ideofs=OG.ideofs where OG.numofs like '"+mo+"'  group by OG.numofs, O.qtepre, S.datdebpre, S.datdebree, SS.datfinpre, SS.datfinree;"
           lxpConnector(query, function(globalResult){
@@ -536,6 +537,14 @@ function CPSControleFunction(mo){
     })
   }
 
+  exports.getIssues = function(req, res){
+    var mo = req.params.mo;
+    var query = 'select type, description, mo, ope, count(mo) as occurence from issue where mo="'+mo+'" group by type, description, mo, ope'
+    odbcConnector(query, function(result){
+      res.send(result)
+    })
+  }
+
   exports.getOperations = function(req,res){
     var mo = req.params.mo;
     var query = "SELECT OP.codope, OP.libope, OP.datdebree, OP.datfinree, OP.qtefai FROM ofsope OP JOIN ofsgen O ON O.ideofs=OP.ideofs WHERE O.numofs="+mo;
@@ -557,10 +566,13 @@ function CPSControleFunction(mo){
     var body = req.body;
     var mo = req.params.mo;
     var ope = req.params.ope;
-    for(i=0;i<body.occurence;i++){
+    var done=false;
+    console.log(body)
+    for(i=0;i<Number(body.occurence);i++){
       done=false
-      var query = "INSERT INTO issue (type, description, occurence, mo, ope) VALUES ('"+body.type+"','"+body.description+"','"+body.occurence+"','"+mo+"', '"+ope+"')";
+      var query = "INSERT INTO issue (type, description, mo, ope) VALUES ('"+body.type+"','"+body.description+"','"+mo+"', '"+ope+"')";
       odbcConnector(query, function(result){
+        console.log('done')
         done=true
       })
       require('deasync').loopWhile(function(){return !done;});

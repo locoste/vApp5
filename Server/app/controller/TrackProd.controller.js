@@ -170,10 +170,10 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
 
 	});
 
-	$http.post('http://'+url+':'+port+'/startCPSControl/' + mo).then(function(response) {
+	/*$http.post('http://'+url+':'+port+'/startCPSControl/' + mo).then(function(response) {
 		console.log("start CPS: ",response);
 	});
-
+*/
 	$http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Type' : 'application/json'}}).then(function(response) {
 		console.log("getOperations: ",response);
 		$scope.operations=response.data;
@@ -225,14 +225,25 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 
 	});*/
 
+	$scope.addIssue = function(){
+		var body = {type:$scope.newIssue.type, description:$scope.newIssue.description, occurence:$scope.newIssue.occurence}
+		$http.post('http://'+url+':'+port+'/newIssue/'+ mo + '/' + $scope.selectedOpe, body).then(function(response){
+			$http.get('http://'+url+':'+port+'/getIssues/'+ mo).then(function(response){
+				$scope.issues=response.data
+				console.log("getIssues: ",response);
+				updateListChart();
+			});
+		});
+	}
+
 	$http.get('http://'+url+':'+port+'/getUserCompany').then(function(response){
 		$scope.User = response.data[0].company;
 	});
 	
 	$scope.selectOpe = function(ope){
-		var selectedOpe=ope;
-		$scope.selectedOpe=selectedOpe;
-		$http.get('http://'+url+':'+port+'/getWatchList/'+mo+'/'+selectedOpe).then(function(response){
+		console.log('ope', ope)
+		$scope.selectedOpe=ope;
+		$http.get('http://'+url+':'+port+'/getWatchList/'+mo+'/'+$scope.selectedOpe).then(function(response){
 		console.log("getWatchList: ",response);
 		$scope.watchList = response.data;
 	});
@@ -243,24 +254,30 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 	}
 
 	function updateListChart(){
+		console.log('upadte list chart')
 		var tabIssue = [];
 		var label = [];
 		var percentage = [];
 		var sumPercentage = [];
 		var compt=0;
 		var sum = 0;
+		var done = false;
+
+		console.log('scope issue', $scope.issues)
 
 		for(let issue in $scope.issues){
-			if (tabIssue.includes(issue.type)){
-				for(let line in tabIssue){
-					if(line.type==issue.type){
-						line.occurence+=issue.occurence;
-						sum+=issue.occurence;
-					}
+			done = false;
+			console.log('issue: ', $scope.issues[issue])
+			for(let line in tabIssue){
+				if(tabIssue[line].type==$scope.issues[issue].type){
+					tabIssue[line].occurence+=$scope.issues[issue].occurence;
+					sum+=$scope.issues[issue].occurence;
+					done=true;
 				}
-			} else {
-				tabIssue.push({type:issue.type, occurence:issue.occurence, percentage:0});
-				sum+=issue.occurence;
+			}
+			if(done==false){
+				tabIssue.push({type:$scope.issues[issue].type, occurence:$scope.issues[issue].occurence, percentage:0});
+				sum+=$scope.issues[issue].occurence;
 			}
 		}
 
@@ -270,21 +287,24 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 			}
 		}
 
-		tabIssue.push(['CPS', compt]);
+		tabIssue.push({type:'CPS', occurence: compt, percentage:0});
 		sum+=compt;
 		for(let line in tabIssue){
-			line.percentage=line.occurence/sum*100;
+			tabIssue[line].percentage=tabIssue[line].occurence/sum*100;
+			tabIssue[line].percentage=tabIssue[line].percentage.toFixed(2)
 		}
 
 		$scope.knownIssues = tabIssue;
-		Array.prototype.reverse.call(tabIssue);
-		console.log('Tab Issues ',tabIssue);
+		tabIssue.sort(function(a, b) {
+		    return parseFloat(b.occurence) - parseFloat(a.occurence);
+		});
+		console.log('Tab Issues ',JSON.stringify(tabIssue));
 
 		sum=0;
 		for (let line in tabIssue){
-			label.push(line.type);
-			percentage.push(line.percentage);
-			sum+=line.percentage;
+			label.push(tabIssue[line].type);
+			percentage.push(tabIssue[line].percentage);
+			sum+=tabIssue[line].percentage;
 			sumPercentage.push(sum);
 		}
 

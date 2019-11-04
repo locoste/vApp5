@@ -114,10 +114,10 @@ module.exports = function(app) {
     app.get('/getOperations/:mo'/*, contSession.authrequired*/, controller.getOperations);
 
     // start a CPS control on an operation of a Manufacturing Order
-    app.post('/startCPSControl'/*, contSession.authrequired*/, controller.startCPSControl);
+    app.post('/startCPSControl/:mo'/*, contSession.authrequired*/, controller.startCPSControl);
 
     // stop CPS control
-    app.post('/stopCPSControl'/*, contSession.authrequired*/, controller.stopCPSControl);
+    app.post('/stopCPSControl/:mo'/*, contSession.authrequired*/, controller.stopCPSControl);
 
     // configure both camera of the CPS
     app.post('/configureCamera'/*, contSession.authrequired*/, controller.configureCamera);
@@ -130,6 +130,9 @@ module.exports = function(app) {
 
     // new issue
     app.post('/newIssue/:mo/:ope'/*, contSession.authrequired*/, controller.newIssue);
+
+    // get issue from an mo
+    app.get('/getIssues/:mo'/*, contSession.authrequired*/, controller.getIssues)
 
     // get product sequence
     app.get('/getProductSequence/:mo'/*, contSession.authrequired*/, controller.getProductSequence);
