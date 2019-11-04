@@ -118,18 +118,30 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
 		//$scope.released_qty=response.data.globalInformation[0][0].qtefai;
 		$scope.planned_qty=response.data.finalQuantity[0][0].qtepre;
 
-		var tab=[]
+		var tab=[];
+		var tabFinalQuantity =[];
 		var sum = 0;
 		for(i=0;i<response.data.dailyTargetQuantity[0].length;i++){
-			tab.push({x:new Date(response.data.dailyTargetQuantity[0][i].datfinpre),y:response.data.dailyTargetQuantity[0][i].qtepre});
+			sum+=response.data.dailyTargetQuantity[0][i].qtepre
+			tab.push({x:new Date(response.data.dailyTargetQuantity[0][i].datfinpre),y:sum});
+			tabFinalQuantity.push({x:new Date(response.data.dailyTargetQuantity[0][i].datfinpre),y:response.data.finalQuantity[0][0].qtepre})
 		}
 
 		
 		var dailyTargetQuantityDS = {
 			label: 'Target Daily Quantity',
-			backgroundColor: 'ForestGreen',
 			borderColor: 'Green',
-			data: tab
+			fill: false,
+			data: tab,
+			type:'line'
+		}
+
+		var finalTargetQuantityDS = {
+			label: 'Target Final Quantity',
+			borderColor: 'Orange',
+			fill: false,
+			data: tabFinalQuantity,
+			type:'line'
 		}
 
 		var tabDailyQuantity = [];
@@ -148,8 +160,8 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
 
 		var dailySumQuantityDS = {
 			label: 'Sum Of Daily Quantity',
-	      // backgroundColor: 'rgb(255, 140, 132)',
 	      borderColor: 'Red',
+	      fill: false,
 	      data: tabSumQuantity,
 	      type: 'line'
 	  }
@@ -164,6 +176,7 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
 	  chart.data.datasets.push(dailyTargetQuantityDS);
 	  chart.data.datasets.push(dailySumQuantityDS);
 	  chart.data.datasets.push(dailyQuantityDS);
+	  chart.data.datasets.push(finalTargetQuantityDS);
 	  chart.update();
 	  console.log(chart.data)
 
