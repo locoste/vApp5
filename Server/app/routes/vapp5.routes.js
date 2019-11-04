@@ -132,7 +132,7 @@ module.exports = function(app) {
     app.post('/newIssue/:mo/:ope'/*, contSession.authrequired*/, controller.newIssue);
 
     // get issue from an mo
-    app.get('/getIssues/:mo'/*, contSession.authrequired*/, controller.getIssues)
+    app.get('/getIssues/:mo/:ope'/*, contSession.authrequired*/, controller.getIssues)
 
     // get product sequence
     app.get('/getProductSequence/:mo'/*, contSession.authrequired*/, controller.getProductSequence);
@@ -142,4 +142,6 @@ module.exports = function(app) {
 
     // get treant files
     app.get('/Vapp5/tree/:page' /*,contSession.authrequired*/, controller.getTreantFile);
+
+    app.get('/getCustomerQuantity/:mo' /*,contSession.authrequired*/, controller.getCustomerQuantity)
 }

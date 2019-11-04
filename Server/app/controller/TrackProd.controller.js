@@ -191,6 +191,11 @@ app.controller('TrackProd', function($scope, $http, config, Faye) {
 	$http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Type' : 'application/json'}}).then(function(response) {
 		console.log("getOperations: ",response);
 		$scope.operations=response.data;
+		$scope.selectedOpe=response.data[0].codope;
+		$http.get('http://'+url+':'+port+'/getWatchList/'+mo+'/'+$scope.selectedOpe).then(function(response){
+			console.log("getWatchList: ",response.data);
+			$scope.watchList = response.data;
+		});
 	});
 	var ctx = document.getElementById('trackingChart').getContext('2d');
 
@@ -229,7 +234,7 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 	/*$http.get('http://'+url+':'+port+'/getProductSequence/' + mo, {headers : {'Content-Type' : 'application/json'}}).then(function(response) {
 		console.log("getProductSequence: ",response);
 	});*/
-	$http.get('http://'+url+':'+port+'/getIssues/'+ mo).then(function(response){
+	$http.get('http://'+url+':'+port+'/getIssues/'+ mo + '/' + $scope.selectedOpe).then(function(response){
 		$scope.issues=response.data
 		console.log("getIssues: ",response);
 		updateListChart();
@@ -242,7 +247,7 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 	$scope.addIssue = function(){
 		var body = {type:$scope.newIssue.type, description:$scope.newIssue.description, occurence:$scope.newIssue.occurence}
 		$http.post('http://'+url+':'+port+'/newIssue/'+ mo + '/' + $scope.selectedOpe, body).then(function(response){
-			$http.get('http://'+url+':'+port+'/getIssues/'+ mo).then(function(response){
+			$http.get('http://'+url+':'+port+'/getIssues/'+ mo + '/' + $scope.selectedOpe).then(function(response){
 				$scope.issues=response.data
 				console.log("getIssues: ",response);
 				updateListChart();
@@ -261,6 +266,47 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 			console.log("getWatchList: ",response.data);
 			$scope.watchList = response.data;
 		});
+	}
+
+
+	$scope.clustIssue = function(range){
+		console.log('button: '+document.getElementById(range+"Button"))
+		if(document.getElementById(range+"Button").checked==true){
+			document.getElementById(range+"Button").checked=false;
+		} else {
+			document.getElementById(range+"Button").checked=true;
+		}
+		console.log($scope.issues)
+		if(document.getElementById(range+"Button").checked==true){
+			if(range=='order'){
+				for(let issue in $scope.issues){
+					$scope.issues[issue].percentage=$scope.issues[issue].occurence/$scope.planned_qty
+					$scope.issues[issue].percentage=$scope.issues[issue].percentage.toFixed(2)+'%'
+				}
+				if(document.getElementById("customerButton").checked==true){
+					document.getElementById("customerButton").checked=false;
+				}
+
+			} else {
+				$http.get('http://'+url+':'+port+'/getCustomerQuantity/'+mo).then(function(response){
+					for(let issue in $scope.issues){
+						if($scope.issues[issue].occurence/response.data[0].sumqte<0.01){
+							$scope.issues[issue].percentage='<0,01%'
+						} else {
+							$scope.issues[issue].percentage=$scope.issues[issue].occurence/response.data[0].sumqte
+							$scope.issues[issue].percentage=$scope.issues[issue].percentage.toFixed(2)+'%'
+						}
+					}
+					if(document.getElementById("orderButton").checked==true){
+						document.getElementById("orderButton").checked=false;
+					}
+				})
+			} 
+		} else {
+			for(let issue in $scope.issues){
+				$scope.issues[issue].percentage=""
+			}
+		}
 	}
 
 	$scope.logout = function(){
@@ -332,7 +378,7 @@ $http.get('http://'+url+':'+port+'/getOperations/' + mo, {headers :	{'Content-Ty
 
 		var sumPercentageDS = {
 			label: 'Pareto line',
-			backgroundColor: 'White',
+			fill: false,
 			borderColor: 'Red',
 			data: sumPercentage,
 			type: 'line'

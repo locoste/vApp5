@@ -274,6 +274,11 @@ th {
   text-decoration: none;
 }
 
+.butn:checked {
+  background: #191970;
+  text-decoration: none;
+}
+
 .nav-item {
   color:#CED5E8;
 }

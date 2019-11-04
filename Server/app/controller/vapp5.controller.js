@@ -539,10 +539,11 @@ function CPSControleFunction(mo){
 
   exports.getIssues = function(req, res){
     var mo = req.params.mo;
-    var query = 'select type, description, mo, ope, count(mo) as occurence from issue where mo="'+mo+'" group by type, description, mo, ope'
+    var ope = req.params.ope;
+    var query = 'select type, description, mo, ope, count(mo) as occurence from issue where mo="'+mo+'" and ope="'+ope+'" group by type, description, mo, ope'
     odbcConnector(query, function(result){
-      res.send(result)
-    })
+      res.send(result);
+    });
   }
 
   exports.getOperations = function(req,res){
@@ -559,6 +560,14 @@ function CPSControleFunction(mo){
     var query = "select distinct O.numofs, A.libar1, datdebpre,min(OP.datdebree) as datdebree, datfinpre, max(OP.datfinree) as datfinree, OP.qtepre, OP.qtefai     from ofsope OP   join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope left join ofsres R on OP.ideope=R.ideope join artgen A on O.ideart=A.ideart where datdebpre > (select max(OP.datfinree) from ofsope OP join ofsgen O on OP.ideofs=O.ideofs where O.numofs like '"+mo+"') and (R.ideres in (select ideres from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofsres R on OP.ideope=R.ideope where OP.codope like '"+ope+"') or OC.ideart in (select distinct OC.ideart from ofsope OP join ofsgen O on OP.ideofs=O.ideofs left join ofscom OC on OP.ideope=OC.ideope where OP.codope like '"+ope+"')) group by O.numofs, datdebpre, R.ideres, OC.ideart, A.libar1, datfinpre, OP.qtepre, OP.qtefai having min(OP.datdebree) is null order by datdebpre;"
     lxpConnector(query, function(result){
       res.send(result);
+    })
+  }
+
+  exports.getCustomerQuantity = function(req, res){
+    var mo = req.params.mo;
+    var query = "SELECT sum(qtepre) as sumqte FROM ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on C.idedoc=CL.idedoc where codcpt = (select codcpt FROM ofsgen O join ofscde OC on O.ideofs=OC.ideofs join cdelig CL on OC.idelig=CL.idelig join cdeent C on C.idedoc=CL.idedoc where numofs = '80191723') group by codcpt;"
+    lxpConnector(query, function(result){
+      res.send(result)
     })
   }
 
