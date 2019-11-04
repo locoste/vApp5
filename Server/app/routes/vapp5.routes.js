@@ -119,6 +119,9 @@ module.exports = function(app) {
     // stop CPS control
     app.post('/stopCPSControl/:mo'/*, contSession.authrequired*/, controller.stopCPSControl);
 
+    // get all cps control
+    app.get('/getCPSControl/:mo'/*, contSession.authrequired*/, controller.getCPSControl)
+
     // configure both camera of the CPS
     app.post('/configureCamera'/*, contSession.authrequired*/, controller.configureCamera);
 

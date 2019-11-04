@@ -9,7 +9,7 @@
 <body ng-app="app">
 
     <div ng-controller="CustomController">
-      <div id="productionSequence"> </div>
+      <treant-graph data="graph"> </treant-graph>
       {{nodeSelectedLast}}
     </div>
 
@@ -22,8 +22,6 @@
     <!-- I could not find the bower files -->
     <script src="tree/raphael.js"></script>
     <script src="tree/Treant.js"></script>
-
-    <script>new Treant(simple_chart_config);</script>
 
 </body>
 

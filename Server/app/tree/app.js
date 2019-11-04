@@ -1,5 +1,10 @@
 var app = angular.module("app", ["ngTreant"]);
 
+app.constant('config', {  
+    api_url: 'localhost',
+    api_port: '8004',
+});
+
 angular.module('ngTreant', [])
 .directive('treantGraph', function () {
     return {

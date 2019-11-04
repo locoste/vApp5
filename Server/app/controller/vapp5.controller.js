@@ -157,7 +157,6 @@ exports.displayLoginPage = function(req, res) {
       var script = req.params.script;
       var path1 = req.params.pathOne;
       var path2 = req.params.pathTwo;
-      console.log(script)
       res.writeHead(200, {"Content-Type": "text/plain"});
       fs.readFile('./faye/components/'+path1+'/'+path2+'/'+script, function(err, js){
         if(err){
@@ -175,7 +174,6 @@ exports.displayLoginPage = function(req, res) {
     try{
       var script = req.params.script;
       var path1 = req.params.pathOne;
-      console.log(script)
       res.writeHead(200, {"Content-Type": "text/plain"});
       fs.readFile('./faye/components/'+path1+'/'+script, function(err, js){
         if(err){
@@ -369,7 +367,11 @@ function CPSControleFunction(mo){
       var max = 6;
       var queryControl = "select qtepre from ofsgen where numofs='"+mo+"'"
       lxpConnector(queryControl, function(resultControl){
+        if(Number(resultControl[0].qtepre)>20){
           controlSize = Math.round(Number(resultControl[0].qtepre)/10);
+        } else {
+          controlSize = Math.round(Number(resultControl[0].qtepre));
+        }
           console.log('size total: '+controlSize)
           // beginning of the control
           CPScontrole = setInterval(function(){
@@ -382,14 +384,14 @@ function CPSControleFunction(mo){
                 clearInterval(CPScontrole);
               } else {
                 var nbBlob = Math.floor(Math.random() * Math.floor(8));
-                var query = 'INSERT INTO control(min, max, control, mo) VALUES ('+min+','+max+','+nbBlob+','+mo+');';
-                console.log(query);
-                odbcConnector(query, function(result){
-                  if(nbBlob>max){
+                if(nbBlob>max){
                     var ok = 'NOK'
                   } else {
                     var ok = 'OK'
                   }
+                var query = 'INSERT INTO control(min, max, control, mo, measure, status) VALUES ('+min+','+max+','+nbBlob+','+mo+',"Apperance","'+ok+'");';
+                console.log(query);
+                odbcConnector(query, function(result){
                   bayeux.getClient().publish('/control', {measure:'Apperance', min:min, max:max, control:nbBlob, status:ok});
                   console.log(nbBlob);
                 })
@@ -400,6 +402,14 @@ function CPSControleFunction(mo){
   } catch(err){
     console.log(err)
   }
+}
+
+exports.getCPSControl = function(req, res){
+  var mo = req.params.mo;
+  var query = 'select * from control where mo="'+mo+'"';
+  odbcConnector(query, function(result){
+    res.send(result)
+  })
 }
 
 /* nb blob of corecontrol.py
@@ -629,10 +639,10 @@ function CPSControleFunction(mo){
     var tab = [];
     var query = "select distinct C.idelig, C.datdem, A.ideart, A.codart, A.libar1, CE.refcde, CE.codcpt , CE.idedoc, O.ideofs, O.numofs, O.datcre, O.qtepre, OS.idemvt as pere"
     query+=" from artgen A join ofsgen O on A.ideart=O.ideart left join cdelig C on A.ideart=C.ideart left join ofssof OS on O.ideofs=OS.ideofs left join cdalig CA on CA.ideart=A.ideart left join cdaent CE on CA.idedoc=CE.idedoc"
-    query+=" where O.numofs like '"+mo+"'"
+    query+=" where O.numofs like '"+mo+"' and C.datdem=(select C.datdem from ofsgen O join ofscde OC on OC.ideofs=O.ideofs join cdelig CL on CL.idelig=OC.idelig join cdeent C on C.idedoc=CL.idedoc where numofs='"+mo+"')"
     console.log(query)
     lxpConnector(query, function(result){
-      //console.log(result)
+      console.log(result)
       var query2 = "select C.idelig, C.datdem, A.ideart, A.codart, A.libar1, CE.refcde, CE.codcpt , CE.idedoc, O.ideofs, O.numofs, O.datcre, O.qtepre, OS.idemvt as pere"
       query2+=" from artgen A join ofsgen O on A.ideart=O.ideart left join cdelig C on A.ideart=C.ideart left join ofssof OS on O.ideofs=OS.ideofs left join cdalig CA on CA.ideart=A.ideart left join cdaent CE on CA.idedoc=CE.idedoc"
       lxpConnector(query2, function(globalResult){
@@ -668,7 +678,7 @@ function CPSControleFunction(mo){
           }
         }
         finalProduct.push(tab);
-        console.log(finalProduct);
+        console.log('finalProduct', finalProduct);
         callback();
       })
     })
@@ -685,7 +695,7 @@ function CPSControleFunction(mo){
             res.push(result);
             done=true;
           })
-          require('deasync').loopWhile(function(){console.log(done);return !done;});
+          require('deasync').loopWhile(function(){return !done;});
         }
       }
     }
